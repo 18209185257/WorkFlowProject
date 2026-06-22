@@ -1,0 +1,35 @@
+.dashboard-v8{
+
+    width:100%;
+}
+
+.sidebar-v8{
+
+    width:240px;
+
+    min-height:100vh;
+
+    background:#0f172a;
+
+    color:white;
+
+    padding:20px;
+}
+
+.dashboard-main{
+
+    flex:1;
+
+    padding:20px;
+}
+
+.dashboard-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    box-shadow:0 2px 12px rgba(0,0,0,.05);
+}

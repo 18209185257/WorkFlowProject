@@ -1,0 +1,79 @@
+.ai-dashboard{
+    padding:30px 230px;
+    background:#f4f8fc;
+    min-height:100vh;
+}
+
+.ai-header{
+    background:
+        linear-gradient(
+            135deg,
+            #071b49,
+            #0f4cb8
+        );
+
+    color:white;
+    border-radius:20px;
+    padding:30px 40px;
+    margin-bottom:25px;
+}
+
+.ai-header h1{
+    margin:0;
+    font-size:32px;
+    color:#ffffff !important;
+    font-weight:700;
+}
+
+.ai-header p{
+    opacity:.8;
+    color:#dbeafe !important;
+    margin-top:8px;
+    font-size:15px;
+}
+
+.kpi-row{
+    margin-bottom:25px;
+}
+
+.kpi-card{
+    background:white;
+    border-radius:18px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+.kpi-card h2{
+    color:#2563eb;
+    font-size:32px;
+    margin-top:10px;
+    color:#2563eb;
+}
+
+.quick-card button{
+    height:56px !important;
+    border-radius:14px !important;
+    font-weight:700 !important;
+}
+
+.enterprise-chatbot{
+    background:white !important;
+    border-radius:16px !important;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+.ai-panel{
+    background:white;
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+.ai-panel h3{
+    margin-bottom:12px;
+    color:#1e3a8a;
+}
+
+

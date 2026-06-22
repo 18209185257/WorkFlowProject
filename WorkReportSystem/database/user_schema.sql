@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    real_name TEXT,
+    phone TEXT,
+    role TEXT DEFAULT 'employee',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS login_log(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    login_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
