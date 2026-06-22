@@ -52,26 +52,6 @@
     padding:40px;
 }
 
-.welcome-title {
-    font-size:40px;
-    color:white;
-    font-weight:800;
-}
-
-.welcome-desc {
-    margin-top:0px;
-    font-size:18px;
-    opacity:0.95;
-    color:white;
-}
-
-.welcome-date {
-    margin-top:12px;
-    font-size:18px;
-    opacity:0.9;
-    color:white;
-}
-
 .welcome-right {
     font-size:36px;
     opacity:0.35;

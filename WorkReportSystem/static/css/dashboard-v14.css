@@ -2,6 +2,7 @@
     display:flex;
     height:100vh;
     background:#f5f7fb;
+    padding-top:30px;
 }
 
 /* 左侧菜单 */
@@ -62,6 +63,26 @@
 
 .welcome-bar h2{
     margin:0;
+}
+
+.welcome-title {
+    font-size:30px;
+    color:#333333;
+    font-weight:700;
+}
+
+.welcome-desc {
+    margin-top:0px;
+    font-size:18px;
+    opacity:0.95;
+    color:#333333;
+}
+
+.welcome-date {
+    margin-top:12px;
+    font-size:18px;
+    opacity:0.9;
+    color:#333333;
 }
 
 /* KPI */

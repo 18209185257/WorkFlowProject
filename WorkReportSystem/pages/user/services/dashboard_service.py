@@ -737,105 +737,6 @@ def build_weekly_report_html(real_name):
     </div>
     """
 
-def build_dashboard_layout(real_name):
-
-    now = datetime.now().strftime(
-        "%Y-%m-%d %H:%M"
-    )
-
-    return f"""
-    <div class="dashboard-layout">
-
-        <div class="dashboard-sidebar">
-
-            <div class="logo-area">
-                🚀 Hazhi Raysent
-            </div>
-
-            <div class="menu-item active">
-                📊 工作台
-            </div>
-
-            <div class="menu-item">
-                📁 我的项目
-            </div>
-
-            <div class="menu-item">
-                📜 提交记录
-            </div>
-
-            <div class="menu-item">
-                👤 个人中心
-            </div>
-
-        </div>
-
-        <div class="dashboard-main">
-
-            <div class="dashboard-header">
-
-                <div>
-
-                    <div class="welcome-title">
-                        欢迎回来，{real_name}
-                    </div>
-
-                    <div class="welcome-desc">
-                        今日工作状态总览
-                    </div>
-
-                </div>
-
-                <div class="header-time">
-                    {now}
-                </div>
-
-            </div>
-
-            <div id="dashboardKpi"></div>
-
-            <div class="chart-row">
-
-                <div
-                    id="submitPieChart"
-                    class="chart-card">
-                </div>
-
-                <div
-                    id="submitLineChart"
-                    class="chart-card">
-                </div>
-
-            </div>
-
-            <div class="bottom-row">
-
-                <div
-                    id="myProjectCard"
-                    class="panel-card">
-                </div>
-
-                <div
-                    id="recentSubmitCard"
-                    class="panel-card">
-                </div>
-
-            </div>
-            
-            <div class="chart-card">
-                <div id="projectRankChart"></div>
-            </div>
-
-            <div
-                id="aiAnalysisCard"
-                class="ai-card">
-            </div>
-
-        </div>
-
-    </div>
-    """
-
 def load_dashboard_ai(real_name):
 
     return (
@@ -1668,17 +1569,21 @@ value="{real_name}"
 
             <div class="welcome-bar">
 
-                <h2>
+                <div>
 
-                    欢迎回来，{real_name}
+                    <div class="welcome-title">
+                        欢迎回来，{real_name}
+                    </div>
 
-                </h2>
+                    <div class="welcome-desc">
+                        今日工作状态总览
+                    </div>
 
-                <span>
+                </div>
 
+                <div class="welcome-date">
                     {now}
-
-                </span>
+                </div>
 
             </div>
 
