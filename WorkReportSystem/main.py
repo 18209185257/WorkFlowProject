@@ -140,14 +140,7 @@ from pages.user.services.my_profile_service import (
 )
 
 from pages.user.services.dashboard_service import (
-    build_my_project_top5_html,
-    build_recent_submit_html,
-    build_project_rank_chart,
-    build_ai_analysis_html,
-    get_dashboard_kpi_data,
-    build_weekly_report_html,
     build_dashboard_v14,
-    get_user_profile,
     update_user_password,
     get_project_health_rank,
     get_risk_projects,
@@ -1205,25 +1198,6 @@ with gr.Blocks(
         inputs=delete_user_event,
         outputs=user_html
     )
-
-
-    def load_dashboard_data(real_name):
-
-        kpi = get_dashboard_kpi_data(real_name)
-
-        return (
-
-            build_my_project_top5_html(real_name),
-
-            build_recent_submit_html(real_name),
-
-            build_project_rank_chart(),
-
-            build_ai_analysis_html(real_name, kpi),
-
-            build_weekly_report_html(real_name)  # ⭐新增
-
-        )
 
     # ====================================================
     # 登录
