@@ -230,6 +230,18 @@ def ai_meeting(content:str):
 
     }
 
+@app.get("/api/dashboard/trend")
+def api_dashboard_trend(user:str,days:int=7):
+
+    from pages.user.services.dashboard_service import (
+        get_line_by_days
+    )
+
+    return get_line_by_days(
+        user,
+        days
+    )
+
 user_table_state = gr.State([])
 current_project_id = gr.State()
 editing_progress_id = gr.State()

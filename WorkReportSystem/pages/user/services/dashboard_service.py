@@ -1229,14 +1229,14 @@ def build_dashboard_v14(username, real_name):
     submit_html = ""
 
     for r in data["reports"]:
-
         submit_html += f"""
         <div class="submit-item">
-
-            <span>{r[0]}</span>
-
-            <span>{r[1][:40]}</span>
-
+            <div>
+                <b>{r[0]}</b>
+            </div>
+            <div>
+                {r[1][:30]}
+            </div>
         </div>
         """
 
@@ -1393,6 +1393,9 @@ value="{real_name}"
             <div class="chart-row">
 
                 <div class="chart-card">
+                    <div class="chart-title">
+                        提交类型分布
+                    </div>
 
                     <div id="pieChart"
                          data-chart='{pie_json}'>
@@ -1402,7 +1405,22 @@ value="{real_name}"
                 </div>
 
                 <div class="chart-card">
+                    <div class="chart-header">
 
+                        <div class="chart-title">
+                            近7天提交趋势
+                        </div>
+            
+                        <select id="trendDays"
+                                onchange="reloadTrend(this.value)">
+            
+                            <option value="7">近7天</option>
+                            <option value="15">近15天</option>
+                            <option value="30">近30天</option>
+            
+                        </select>
+            
+                    </div>
                     <div id="lineChart"
                          data-chart='{line_json}'>
 
@@ -1456,6 +1474,34 @@ value="{real_name}"
                 
                 </div>
 
+            </div>
+            
+            <div class="dashboard-bottom">
+
+                <div class="project-panel">
+            
+                    <div class="panel-title">
+            
+                        我负责的项目
+            
+                    </div>
+            
+                    {project_html}
+            
+                </div>
+            
+                <div class="submit-panel">
+            
+                    <div class="panel-title">
+            
+                        最近提交记录
+            
+                    </div>
+            
+                    {submit_html}
+            
+                </div>
+            
             </div>
 
         </div>
@@ -1838,5 +1884,41 @@ def get_notice_list(real_name):
 
     return rows
 
+#趋势图日期刷选
+def get_line_by_days(real_name, days=7):
 
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            report_date,
+            COUNT(*)
+        FROM daily_report
+
+        WHERE reporter=?
+
+        GROUP BY report_date
+
+        ORDER BY report_date DESC
+
+        LIMIT ?
+    """,(real_name,days))
+
+    rows = cur.fetchall()
+
+    conn.close()
+
+    rows.reverse()
+
+    return [
+
+        {
+            "date":r[0],
+            "count":r[1]
+        }
+
+        for r in rows
+    ]
 

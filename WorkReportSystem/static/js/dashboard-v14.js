@@ -304,3 +304,41 @@ function showGradioPage(page){
     }
 
 }
+
+async function reloadTrend(days){
+
+    const user =
+        document.getElementById(
+            "dashboard-user"
+        ).value;
+
+    const rows =
+        await fetch(
+            `/api/dashboard/trend?user=${user}&days=${days}`
+        )
+        .then(r=>r.json());
+
+    const chart =
+        echarts.getInstanceByDom(
+            document.getElementById(
+                "lineChart"
+            )
+        );
+
+    chart.setOption({
+
+        xAxis:{
+            data:rows.map(
+                i=>i.date
+            )
+        },
+
+        series:[{
+
+            data:rows.map(
+                i=>i.count
+            )
+
+        }]
+    });
+}

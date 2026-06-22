@@ -198,3 +198,66 @@
 .hidden-trigger{
     display:none !important;
 }
+
+.chart-title{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:12px;
+}
+
+.chart-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+}
+
+#trendDays{
+    padding:4px 25px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+.dashboard-bottom{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:20px;
+
+    margin-top:20px;
+}
+
+.project-panel,
+.submit-panel{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    padding:16px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.panel-title{
+
+    font-size:16px;
+
+    font-weight:600;
+
+    margin-bottom:12px;
+}
+
+.project-item,
+.submit-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    padding:8px 0;
+
+    border-bottom:1px solid #f0f0f0;
+}
