@@ -382,65 +382,39 @@ function reloadTrend(days){
 
 function openProjectDetail(id){
 
-    fetch(`/api/project/detail?id=${id}`)
-    .then(r=>r.json())
-    .then(data=>{
+    const data = window.PROJECT_DETAIL_DATA?.[id];
 
-        document.getElementById("dashboard-root").innerHTML = `
+    if(!data){
+        console.error("项目不存在:", id);
+        return;
+    }
 
-        <div class="detail-page">
+    document.getElementById("projectModalBody").innerHTML = `
+        <h2>${data.name}</h2>
+        <p>负责人：${data.leader}</p>
+        <p>进度：${data.progress}%</p>
+        <p>风险：${data.risk}</p>
+    `;
 
-            <div class="detail-header">
-
-                <h2>📁 项目详情</h2>
-
-                <button onclick="loadWorkbench()">
-                    ← 返回
-                </button>
-
-            </div>
-
-            <div class="detail-card">
-
-                <p>项目名称：${data.name}</p>
-                <p>进度：${data.progress}%</p>
-                <p>负责人：${data.leader}</p>
-                <p>开发：${data.dev}</p>
-                <p>测试：${data.test}</p>
-                <p>风险：${data.risk}</p>
-                <p>更新时间：${data.time}</p>
-
-            </div>
-
-        </div>
-
-        `;
-
-    });
-
+    document.getElementById("projectModal").style.display = "flex";
 }
 
 function openSubmitDetail(id){
-    fetch(`/api/submit/detail?id=${id}`)
-    .then(r=>r.json())
-    .then(data=>{
-        const modal =
-        document.createElement("div");
-        modal.className="modal";
-        modal.innerHTML = `
-        <div class="modal-content">
-            <h3>📤 提交详情</h3>
-            <p><b>用户：</b>${data.user}</p>
-            <p><b>日期：</b>${data.date}</p>
-            <p><b>内容：</b>${data.content}</p>
-            <p><b>帮助事项：</b>${data.help}</p>
-            <button onclick="this.parentNode.parentNode.remove()">
-                关闭
-            </button>
-        </div>
-        `;
-        document.body.appendChild(modal);
-    });
+
+    const data = window.SUBMIT_DETAIL_DATA?.[id];
+
+    if(!data){
+        console.error("提交不存在:", id);
+        return;
+    }
+
+    document.getElementById("submitModalBody").innerHTML = `
+        <h3>${data.type}</h3>
+        <p>日期：${data.date}</p>
+        <p>${data.content}</p>
+    `;
+
+    document.getElementById("submitModal").style.display = "flex";
 }
 
 function showSubmitDetail(date,content){
@@ -558,3 +532,91 @@ ${weekly.content}
     </div>
     `;
 }
+
+function closeModal(id){
+
+    document.getElementById(
+        id
+    ).style.display="none";
+
+}
+
+function getProjectData(id){
+    const root =
+        document.getElementById(
+            "projectData"
+        );
+
+    const data =
+        JSON.parse(
+            root.dataset.json
+        );
+
+    return data[id];
+}
+
+function getProjectData(id){
+    const root =
+        document.getElementById(
+            "projectData"
+        );
+
+    const data =
+        JSON.parse(
+            root.dataset.json
+        );
+
+    return data[id];
+}
+
+function toggleSubmitRow(row){
+
+    const dom =
+        row.querySelector(".submit-desc");
+
+    const opened =
+        dom.dataset.opened === "1";
+
+    if(opened){
+
+        dom.innerText =
+            dom.dataset.short;
+
+        dom.dataset.opened = "0";
+
+    }else{
+
+        dom.innerText =
+            dom.dataset.full;
+
+        dom.dataset.opened = "1";
+
+    }
+
+}
+function toggleProjectRow(row){
+
+    const dom =
+        row.querySelector(".p-progress");
+
+    const opened =
+        dom.dataset.opened === "1";
+
+    if(opened){
+
+        dom.innerText =
+            dom.dataset.short;
+
+        dom.dataset.opened = "0";
+
+    }else{
+
+        dom.innerText =
+            dom.dataset.full;
+
+        dom.dataset.opened = "1";
+
+    }
+
+}
+

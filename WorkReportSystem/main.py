@@ -152,9 +152,15 @@ from pages.user.services.dashboard_service import (
     get_submit_detail
 )
 
-from pages.user.api.dashboard_api import (
-    dashboard_kpi_api,
-    dashboard_line_api
+from pages.user.ai_assistant.ai_page import (
+    create_ai_assistant_page
+)
+
+from pages.user.ai_assistant.ai_service import (
+    ai_daily,
+    ai_meeting,
+    ai_weekly,
+    ai_project
 )
 
 import json
@@ -557,19 +563,6 @@ with gr.Blocks(
         [ai_chatbot]
     )
 
-    # btn_daily.click(
-    #     lambda: "本周日报统计",
-    #     outputs=ai_msg
-    # ).then(
-    #     user_send_msg,
-    #     [ai_msg, ai_chatbot],
-    #     [ai_msg, ai_chatbot]
-    # ).then(
-    #     ai_reply,
-    #     [ai_msg, ai_chatbot],
-    #     [ai_chatbot]
-    # )
-
     btn_rank.click(
         lambda: "项目进度排行榜",
         outputs=ai_msg
@@ -582,9 +575,6 @@ with gr.Blocks(
         [ai_msg, ai_chatbot],
         [ai_chatbot]
     )
-
-
-
 
     (
         user_manager_page,
@@ -879,16 +869,6 @@ with gr.Blocks(
             )
         )
 
-    # btn_submit_record.click(
-    #     fn=open_my_submit,
-    #     inputs=real_name_state,
-    #     outputs=[
-    #         dashboard_page,
-    #         my_submit_page,
-    #         my_submit_html
-    #     ]
-    # )
-
     submit_query_btn.click(
         fn=build_my_submit_html,
         inputs=[
@@ -920,16 +900,6 @@ with gr.Blocks(
                 username
             )
         )
-
-    # btn_profile.click(
-    #     fn=open_my_profile,
-    #     inputs=user_state,
-    #     outputs=[
-    #         dashboard_page,
-    #         my_profile_page,
-    #         my_profile_html
-    #     ]
-    # )
 
     back_my_profile.click(
         lambda: (
@@ -994,6 +964,78 @@ with gr.Blocks(
             my_project_next_plan
         ],
        outputs=result_msg
+    )
+
+    (
+        ai_page,
+
+        daily_input,
+        daily_btn,
+        daily_output,
+
+        meeting_input,
+        meeting_btn,
+        meeting_output,
+
+        weekly_btn,
+        weekly_output,
+
+        project_name,
+        project_btn,
+        project_output
+
+    ) = create_ai_assistant_page()
+
+
+    def open_ai_page():
+        return (
+            gr.update(
+                visible=False
+            ),
+            gr.update(
+                visible=True
+            )
+        )
+
+    daily_btn.click(
+
+        fn=ai_daily,
+
+        inputs=daily_input,
+
+        outputs=daily_output
+
+    )
+
+    meeting_btn.click(
+
+        fn=ai_meeting,
+
+        inputs=meeting_input,
+
+        outputs=meeting_output
+
+    )
+
+    weekly_btn.click(
+
+        fn=lambda x:
+        ai_weekly(x),
+
+        inputs=real_name_state,
+
+        outputs=weekly_output
+
+    )
+
+    project_btn.click(
+
+        fn=ai_project,
+
+        inputs=project_name,
+
+        outputs=project_output
+
     )
 
     my_ai_btn.click(
@@ -1179,13 +1221,6 @@ with gr.Blocks(
         inputs=save_user_event,
         outputs=user_html
     )
-
-
-    # def save_project(data):
-    #     data = json.loads(data)
-    #     update_project_api(data)
-    #     gr.Info("项目已更新")
-    #     return build_project_html()
 
 
     def remove_project(project_id):

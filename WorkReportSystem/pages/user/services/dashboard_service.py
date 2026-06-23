@@ -1,9 +1,8 @@
 from common.db import get_conn,get_project_conn,OLLAMA_URL,MODEL_NAME
 from pages.user.services.my_project_service import get_user_project_dashboard
-import json
 from .ai_service import ai_dashboard_analysis,ai_generate_weekly_report
-from datetime import datetime
 import  requests
+from pages.leader.services.ai_business_service import call_llm
 
 # 提交类型统计
 import json
@@ -945,132 +944,12 @@ def get_submit_timeline(real_name):
 
     return result
 
-#AI分析
-def generate_dashboard_ai(real_name):
-
-    kpi = get_dashboard_kpi(real_name)
-
-    projects = get_project_list(real_name)
-
-    risk_count = 0
-
-    delay_count = 0
-
-    for p in projects:
-
-        risk = str(p[3] or "")
-
-        progress = str(p[2] or "")
-
-        delay = ""
-
-        if len(p) > 5:
-            delay = str(p[5] or "")
-
-        if risk.strip():
-            risk_count += 1
-
-        if delay == "是":
-            delay_count += 1
-
-    prompt = f"""
-        你是一名企业项目管理顾问。
-        
-        员工：{real_name}
-        
-        日报数量：{kpi['report']}
-        会议数量：{kpi['meeting']}
-        项目数量：{kpi['project']}
-        
-        风险项目数：{risk_count}
-        延期项目数：{delay_count}
-        
-        请生成：
-        
-        1 工作活跃度分析
-        
-        2 项目风险分析
-        
-        3 下周建议
-        
-        控制在300字以内。
-        """
-
-    try:
-
-        result = ollama_chat(prompt)
-
-        return result
-
-    except Exception as e:
-
-        return f"AI分析失败: {e}"
-
-#自动周报
-def generate_weekly_report(real_name):
-
-    conn = get_project_conn()
-
-    cur = conn.cursor()
-
-    cur.execute("""
-    select
-
-        report_date,
-        report_content
-
-    from daily_report
-
-    where reporter=?
-
-    order by report_date desc
-
-    limit 20
-    """,
-    (real_name,)
-    )
-
-    rows = cur.fetchall()
-
-    conn.close()
-
-    content = "\n".join(
-
-        [
-            f"{r[0]} {r[1]}"
-            for r in rows
-        ]
-
-    )
-
-    prompt = f"""
-根据下面工作记录生成周报：
-
-{content}
-
-下周建议：
-
-1. 持续推进项目任务
-2. 定期更新日报
-3. 提前识别项目风险
-"""
-
-    try:
-
-        result = ollama_chat(prompt)
-
-        return result
-
-    except Exception as e:
-
-        return f"周报生成失败: {e}"
 
 def get_dashboard_data(real_name):
 
     conn = get_project_conn()
     cur = conn.cursor()
 
-    # KPI
 
     cur.execute(
         "select count(*) from daily_report where reporter=?",
@@ -1108,7 +987,10 @@ def get_dashboard_data(real_name):
     cur.execute("""
         select id,
             project_name,
-            progress
+            main_leader,
+            progress,
+            risk_block,
+            end_date
         from project
         where
             main_leader like ?
@@ -1282,6 +1164,19 @@ def get_dashboard_data(real_name):
         30
     )
 
+    ai_stats = {
+
+        "report_count": report,
+
+        "meeting_count": meeting,
+
+        "project_count": project,
+
+        "total_count":
+            report + meeting + project
+
+    }
+
     return {
 
         "total": report + meeting + project,
@@ -1302,14 +1197,39 @@ def get_dashboard_data(real_name):
 
         "projects": projects,
 
-        "reports": reports
+        "reports": reports,
+
+        "ai_stats": ai_stats
     }
 
 def build_dashboard_v14(username, real_name):
-
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     data = get_dashboard_data(real_name)
+
+    project_detail_map = {}
+
+    for p in data["projects"]:
+        project_detail_map[p[0]] = {
+            "id": p[0],
+            "name": p[1],
+            "leader": p[2],
+            "progress": p[3],
+            "risk": p[4]
+        }
+
+    submit_detail_map = {}
+
+    for r in data["reports"]:
+        submit_detail_map[r["id"]] = {
+            "id": r["id"],
+            "type": r["type"],
+            "date": r["date"],
+            "content": r["content"]
+        }
+
+    project_json = json.dumps(project_detail_map, ensure_ascii=False)
+    submit_json = json.dumps(submit_detail_map, ensure_ascii=False)
 
     pie_json = json.dumps(
         data["pie"],
@@ -1333,28 +1253,78 @@ def build_dashboard_v14(username, real_name):
 
     project_html = ""
 
-    for p in data["projects"]:
+    colors = [
+        "#1677ff",
+        "#13c2c2",
+        "#52c41a",
+        "#722ed1",
+        "#eb2f96",
+        "#fa8c16"
+    ]
+
+    avatar_color = colors[
+        hash(real_name) % len(colors)
+        ]
+
+    for idx, p in enumerate(data["projects"]):
+        color = colors[idx % len(colors)]
+
+        role = "负责人"
+
         project_html += f"""
         <div
-        class="project-card"
-        onclick="openProjectDetail({p[0]})">
+        class="project-row"
+        onclick="toggleProjectRow(this)">
 
-            <div class="project-name">
-
+            <div class="p-name">
                 {p[1]}
-
             </div>
 
-            <div class="project-progress">
-
-                当前进度 {p[2]}%
-
+            <div
+                class="p-progress"
+                data-short="{p[3][:30]}..."
+                data-full="{p[3]}"
+                data-opened="0">
+                {p[3][:30]}...
             </div>
 
-            <div class="progress-bar">
+            <div class="p-role">
+                {role}
+            </div>
+
+            <div class="p-end-date">
+                ⏰ {p[5]}
+            </div>
+
+        </div>
+        """
+
+    submit_html = ""
+
+    for r in data["reports"]:
+        submit_html += f"""
+        <div
+        class="submit-row"
+        onclick="toggleSubmitRow(this)">
+
+            <div class="submit-dot">
+                📄
+            </div>
+
+            <div class="submit-info">
+
+                <div class="submit-title">
+                    {r["date"]}
+                </div>
 
                 <div
-                style="width:{p[2]}%">
+                    class="submit-desc"
+                    data-short="{r['content'][:60]}..."
+                    data-full="{r['content']}"
+                    data-opened="0">
+            
+                    {r['content'][:60]}...
+            
                 </div>
 
             </div>
@@ -1362,47 +1332,46 @@ def build_dashboard_v14(username, real_name):
         </div>
         """
 
-    submit_html = ""
-    for r in data["reports"]:
-        submit_html += f"""
-        <div
-        class="submit-card"
+    ai_html = f"""
+    <div class="ai-assistant-card">
 
-        onclick="
-        openSubmitDetail(
-        '{r["type"]}',
-        {r["id"]}
-        )
-        ">
+        <div class="panel-title">
+            🤖 AI工作助手
+        </div>
 
-            <div class="submit-type">
+        <div class="ai-summary">
 
-                {r["type"]}
-
-            </div>
-
-            <div class="submit-content">
-
-                {r["content"][:50]}
-
-            </div>
-
-            <div class="submit-date">
-
-                {r["date"]}
-
-            </div>
+            {generate_dashboard_ai(real_name)}
 
         </div>
-        """
 
-    ai_html = """
-    <div class="ai-placeholder">
-        点击AI分析开始生成
+        <button id="weekly_report_btn">
+
+            生成周报
+
+        </button>
+
+        <button id="project_ai_btn">
+
+            项目分析
+
+        </button>
+
     </div>
     """
-
     return f"""
+    <div
+        id="projectData"
+        data-json='{project_json}'
+        style="display:none">
+    </div>
+
+    <div
+        id="submitData"
+        data-json='{submit_json}'
+        style="display:none">
+    </div>
+
 
 <input
 id="dashboard-user"
@@ -1435,7 +1404,7 @@ value="{real_name}"
 
         <div class="logo">
 
-            🚀 工作汇报平台
+            工作汇报平台
 
         </div>
 
@@ -1463,7 +1432,7 @@ value="{real_name}"
         <div class="menu"
              onclick="showPage('ai',this)">
 
-            🤖 AI分析
+            🤖 AI助手
 
         </div>
 
@@ -1644,31 +1613,117 @@ value="{real_name}"
             <div class="dashboard-bottom">
 
                 <div class="project-panel">
-            
-                    <div class="panel-title">
-            
-                        我负责的项目
-            
+
+                    <div class="panel-header">
+                
+                        <h3>
+                            我负责的项目
+                        </h3>
+                
+                        <div
+                        class="panel-link"
+                        onclick="showPage('project',this)">
+                        
+                        查看全部
+                        
+                        </div>
+                
                     </div>
-            
+                
+                    <div class="project-table-header">
+                
+                        <span>项目名称</span>
+                
+                        <span>进度</span>
+                
+                        <span>角色</span>
+                
+                        <span>截止时间</span>
+                
+                    </div>
+                
                     {project_html}
-            
+                
                 </div>
             
                 <div class="submit-panel">
-            
-                    <div class="panel-title">
-            
-                        最近提交记录
-            
+
+                    <div class="panel-header">
+                
+                        <h3>
+                            最近提交记录
+                        </h3>
+                
+                        <div
+                            class="panel-link"
+                            onclick="showPage('submit',this)">
+                            
+                            查看全部
+                            
+                        </div>
+                
                     </div>
-            
-                    {submit_html}
-            
+                
+                    <div class="submit-timeline">
+                
+                        {submit_html}
+                
+                    </div>
+                
                 </div>
-            
+                
             </div>
 
+        </div>
+        
+        <div
+    id="page-project-detail"
+    class="page hidden">
+
+            <div class="page-header">
+        
+                <button
+                    class="back-btn"
+                    onclick="showPage('project')">
+        
+                    ← 返回项目列表
+        
+                </button>
+        
+                <h2>项目详情</h2>
+        
+            </div>
+        
+            <div
+                id="projectDetailContainer">
+        
+            </div>
+        
+        </div>
+        
+        <div
+    id="page-submit-detail"
+    class="page hidden">
+
+            <div class="page-header">
+        
+                <button
+                    class="back-btn"
+                    onclick="showPage('submit')">
+        
+                    ← 返回提交记录
+        
+                </button>
+        
+                <h2>提交详情</h2>
+        
+            </div>
+        
+            <div
+                id="submitDetailContainer">
+        
+            </div>
+        
         </div>
 
         <!-- 我的项目 -->
@@ -1686,11 +1741,31 @@ value="{real_name}"
         
             </div>
         
-            <div class="project-grid">
-        
-                {project_html}
-        
-            </div>
+           <div class="project-panel">
+
+                    <div class="panel-header">
+                
+                        <h3>
+                            我负责的项目
+                        </h3>
+                
+                    </div>
+                
+                    <div class="project-table-header">
+                
+                        <span>项目名称</span>
+                
+                        <span>进度</span>
+                
+                        <span>角色</span>
+                
+                        <span>截止时间</span>
+                
+                    </div>
+                
+                    {project_html}
+                
+                </div>
         
         </div>
 
@@ -1729,78 +1804,97 @@ value="{real_name}"
         </div>
 
         <!-- 个人中心 -->
-
-        <div id="page-profile"
+<div id="page-profile"
      class="page hidden">
 
-            <div class="page-header">
-        
-                <h2>
-                    👤 个人中心
-                </h2>
-        
-            </div>
-        
-            <div class="profile-wrapper">
-        
-                <div class="profile-info-card">
-        
-                    <div class="avatar">
-        
+    <div class="page-header">
+
+        <h2>👤 个人中心</h2>
+
+    </div>
+
+    <div class="profile-layout">
+
+        <!-- 左侧 -->
+
+        <div class="profile-left">
+
+            <div class="user-card">
+
+                <div
+                    class="avatar-big"
+                    style="background:{avatar_color};">
+                    
                         {real_name[0]}
-        
+                    
                     </div>
-        
-                    <div class="profile-info">
-        
-                        <div class="profile-name">
-        
-                            {real_name}
-        
-                        </div>
-        
-                        <div class="profile-account">
-        
-                            {username}
-        
-                        </div>
-        
+
+                <h3>{real_name}</h3>
+
+                <p>{username}</p>
+
+                <div class="user-info">
+
+                    <div>
+
+                        <label>身份</label>
+
+                        <span>员工</span>
+
                     </div>
-        
+
+                    <div>
+
+                        <label>最近登录</label>
+
+                        <span>{now}</span>
+
+                    </div>
+
                 </div>
-        
-                <div class="password-card">
-        
-                    <h3>
-        
-                        修改密码
-        
-                    </h3>
-        
-                    <input
+
+            </div>
+
+        </div>
+
+        <!-- 右侧 -->
+
+        <div class="profile-right">
+
+            <div class="password-card">
+
+                <h3>
+
+                    安全设置
+
+                </h3>
+
+                <input
                     id="oldPwd"
                     type="password"
-                    placeholder="请输入旧密码">
-        
-                    <input
+                    placeholder="旧密码">
+
+                <input
                     id="newPwd"
                     type="password"
-                    placeholder="请输入新密码">
-        
-                    <button
+                    placeholder="新密码">
+
+                <button
                     onclick="changePassword()">
-        
-                        修改密码
-        
-                    </button>
-        
-                    <div id="pwdResult"></div>
-        
-                </div>
-        
+
+                    修改密码
+
+                </button>
+
+                <div id="pwdResult"></div>
+
             </div>
-        
+
         </div>
+
+    </div>
+
+</div>
 
     </main>
 
@@ -1969,22 +2063,6 @@ def get_notifications(real_name):
     conn.close()
 
     return rows
-
-def generate_daily_report(task):
-
-    return f"""
-        今日完成：
-        
-        {task}
-        
-        存在问题：
-        
-        暂无
-        
-        明日计划：
-        
-        继续推进相关工作。
-        """
 
 def generate_meeting_summary(content):
 
@@ -2233,3 +2311,107 @@ def get_submit_detail(submit_id):
         "date": row[2],
         "help": row[3]
     }
+
+def generate_dashboard_ai(real_name):
+
+    data = get_dashboard_data(real_name)
+
+    total = data["total"]
+
+    report = data["report"]
+
+    meeting = data["meeting"]
+
+    project = data["project"]
+
+    return f"""
+本周累计提交 {total} 次。
+
+日报提交 {report} 次，
+会议记录 {meeting} 次，
+项目进展 {project} 次。
+
+整体工作活跃度良好。
+
+建议：
+
+1. 保持日报连续性；
+2. 加强项目风险记录；
+3. 重点关注延期项目。
+"""
+
+def generate_weekly_report(real_name):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        select report_content
+        from daily_report
+        where reporter=?
+        order by id desc
+        limit 20
+    """,(real_name,))
+
+    texts = []
+
+    for row in cur.fetchall():
+
+        texts.append(row[0])
+
+    return "\n".join(texts)
+
+def generate_daily_report(task_text):
+
+    prompt = f"""
+根据以下工作内容，
+生成规范日报：
+
+{task_text}
+"""
+
+    return call_llm(prompt)
+
+#AI项目分析
+def generate_project_analysis(project_name):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        select progress,
+               risk_block
+        from project
+        where project_name=?
+    """,(project_name,))
+
+    row = cur.fetchone()
+
+    if not row:
+
+        return "项目不存在"
+
+    progress = row[0]
+
+    risk = row[1]
+
+    return f"""
+项目：{project_name}
+
+当前进度：
+
+{progress}
+
+风险：
+
+{risk}
+
+AI建议：
+
+1. 持续跟踪关键节点
+2. 每周同步风险状态
+3. 增加里程碑检查
+"""
+
