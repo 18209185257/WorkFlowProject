@@ -125,7 +125,7 @@
 #pieChart,
 #lineChart{
     width:100%;
-    height:300px;
+    height:280px;
 }
 
 /* 快捷入口 */
@@ -167,9 +167,21 @@
     display:flex;
     gap:20px;
     background:white;
-    padding:14px;
+    padding:10px 0;
     border-radius:10px;
     margin-bottom:10px;
+    border-bottom:1px solid #eee;
+}
+
+.submit-title{
+    font-weight:600;
+    color:#333;
+}
+
+.submit-content{
+    color:#888;
+    font-size:13px;
+    margin-top:4px;
 }
 
 /* AI */
@@ -219,25 +231,18 @@
 }
 
 .dashboard-bottom{
-
-    display:grid;
-
+    display:flex;
     grid-template-columns:1fr 1fr;
-
-    gap:20px;
-
+    gap:16px;
     margin-top:20px;
 }
 
 .project-panel,
 .submit-panel{
-
+    flex:1;
     background:#fff;
-
     border-radius:12px;
-
     padding:16px;
-
     box-shadow:0 2px 8px rgba(0,0,0,.05);
 }
 
@@ -260,4 +265,365 @@
     padding:8px 0;
 
     border-bottom:1px solid #f0f0f0;
+}
+
+.project-list,
+.submit-list{
+    max-height:260px;
+    overflow-y:auto;
+}
+
+.project-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.project-item span:first-child{
+    max-width:220px;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+}
+
+.page-header{
+
+    margin-bottom:20px;
+
+}
+
+.page-header h2{
+
+    margin:0;
+
+    font-size:24px;
+
+}
+
+.page-header p{
+
+    color:#888;
+
+    margin-top:6px;
+
+}
+
+.project-grid{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+}
+
+.project-card{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    padding:18px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+
+}
+
+.project-card-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:12px;
+
+}
+
+.project-name{
+
+    font-weight:600;
+
+}
+
+.project-progress{
+
+    color:#1677ff;
+
+}
+
+.project-progress-bar{
+
+    height:8px;
+
+    background:#eee;
+
+    border-radius:99px;
+
+}
+
+.project-progress-inner{
+
+    height:100%;
+
+    background:#1677ff;
+
+    border-radius:99px;
+
+}
+
+.submit-card{
+    width:90%;
+
+    max-width:1200px;
+
+    max-height:80vh;
+
+    overflow:auto;
+
+    background:#fff;
+
+    border-radius:12px;
+
+    padding:16px;
+
+    margin-bottom:12px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+
+}
+
+.submit-type{
+
+    font-weight:600;
+
+    color:#1677ff;
+
+    margin-bottom:8px;
+
+}
+
+.submit-content{
+
+    color:#666;
+
+}
+
+.profile-wrapper{
+
+    max-width:700px;
+
+}
+
+.profile-info-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    background:#fff;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+}
+
+.avatar{
+
+    width:70px;
+
+    height:70px;
+
+    border-radius:50%;
+
+    background:#1677ff;
+
+    color:#fff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:28px;
+
+}
+
+.profile-name{
+
+    font-size:20px;
+
+    font-weight:600;
+
+}
+
+.profile-account{
+
+    color:#888;
+
+}
+
+.password-card{
+
+    background:#fff;
+
+    padding:20px;
+
+    border-radius:12px;
+
+}
+
+.password-card input{
+
+    width:100%;
+
+    margin-bottom:12px;
+
+}
+
+.modal{
+
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,.5);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999;
+
+}
+
+.modal-content{
+
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    width:400px;
+
+}
+
+.detail-page{
+
+    padding:20px;
+
+}
+
+.detail-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+}
+
+.detail-card{
+
+    margin-top:20px;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+
+}
+
+.project-list{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fill,minmax(320px,1fr));
+
+    gap:20px;
+
+}
+
+.project-card{
+
+    background:#fff;
+
+    border-radius:16px;
+
+    padding:20px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    box-shadow:
+      0 4px 12px rgba(0,0,0,.08);
+
+}
+
+.project-card:hover{
+
+    transform:translateY(-4px);
+
+}
+
+.project-title{
+
+    font-size:20px;
+
+    font-weight:700;
+
+    margin-bottom:12px;
+
+}
+
+.project-progress{
+
+    color:#666;
+
+}
+
+.project-footer{
+
+    margin-top:20px;
+
+    color:#3b82f6;
+
+}
+
+.submit-list{
+
+    display:grid;
+
+    gap:16px;
+
+}
+
+.submit-card{
+
+    background:#fff;
+
+    border-radius:14px;
+
+    padding:16px;
+
+    cursor:pointer;
+
+}
+
+.submit-date{
+
+    font-weight:600;
+
+    color:#3b82f6;
+
+    margin-bottom:8px;
+
 }

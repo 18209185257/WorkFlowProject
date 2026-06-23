@@ -147,7 +147,9 @@ from pages.user.services.dashboard_service import (
     generate_dashboard_ai,
     generate_weekly_report,
     generate_daily_report,
-    generate_meeting_summary
+    generate_meeting_summary,
+    get_project_detail,
+    get_submit_detail
 )
 
 from pages.user.api.dashboard_api import (
@@ -230,17 +232,16 @@ def ai_meeting(content:str):
 
     }
 
-@app.get("/api/dashboard/trend")
-def api_dashboard_trend(user:str,days:int=7):
+@app.get("/api/project/detail")
+def api_project_detail(id: int):
 
-    from pages.user.services.dashboard_service import (
-        get_line_by_days
-    )
+    return get_project_detail(id)
 
-    return get_line_by_days(
-        user,
-        days
-    )
+
+@app.get("/api/submit/detail")
+def api_submit_detail(id: int):
+
+    return get_submit_detail(id)
 
 user_table_state = gr.State([])
 current_project_id = gr.State()

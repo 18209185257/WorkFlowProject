@@ -974,27 +974,27 @@ def generate_dashboard_ai(real_name):
             delay_count += 1
 
     prompt = f"""
-你是一名企业项目管理顾问。
-
-员工：{real_name}
-
-日报数量：{kpi['report']}
-会议数量：{kpi['meeting']}
-项目数量：{kpi['project']}
-
-风险项目数：{risk_count}
-延期项目数：{delay_count}
-
-请生成：
-
-1 工作活跃度分析
-
-2 项目风险分析
-
-3 下周建议
-
-控制在300字以内。
-"""
+        你是一名企业项目管理顾问。
+        
+        员工：{real_name}
+        
+        日报数量：{kpi['report']}
+        会议数量：{kpi['meeting']}
+        项目数量：{kpi['project']}
+        
+        风险项目数：{risk_count}
+        延期项目数：{delay_count}
+        
+        请生成：
+        
+        1 工作活跃度分析
+        
+        2 项目风险分析
+        
+        3 下周建议
+        
+        控制在300字以内。
+        """
 
     try:
 
@@ -1106,7 +1106,7 @@ def get_dashboard_data(real_name):
     # 项目
 
     cur.execute("""
-        select
+        select id,
             project_name,
             progress
         from project
@@ -1131,18 +1131,71 @@ def get_dashboard_data(real_name):
     # 最近日报
 
     cur.execute("""
-        select
+        select id,
             report_date,
             report_content
         from daily_report
         where reporter=?
         order by id desc
-        limit 10
+        limit 5
     """,
     (real_name,)
     )
 
-    reports = cur.fetchall()
+    reports = []
+
+    for r in cur.fetchall():
+        reports.append({
+            "id": r[0],
+            "type": "daily",
+            "date": r[1],
+            "content": r[2]
+        })
+
+   #会议
+    cur.execute("""
+    select
+        id,
+        meet_date,
+        meet_content
+    from meeting
+    where sponsor=?
+    order by id desc
+    limit 5
+    """, (real_name,))
+
+    for r in cur.fetchall():
+        reports.append({
+            "id": r[0],
+            "type": "meeting",
+            "date": r[1],
+            "content": r[2]
+        })
+
+    #项目进展
+    cur.execute("""
+    select
+        id,
+        progress_date,
+        progress_content
+    from project_progress
+    where reporter=?
+    order by id desc
+    limit 5
+    """, (real_name,))
+
+    for r in cur.fetchall():
+        reports.append({
+            "id": r[0],
+            "type": "project",
+            "date": r[1],
+            "content": r[2]
+        })
+    reports = sorted(
+        reports,
+        key=lambda x: x["date"],
+        reverse=True
+    )[:10]
 
     # 饼图
 
@@ -1166,16 +1219,68 @@ def get_dashboard_data(real_name):
     (real_name,)
     )
 
-    line = []
+    line = {}
+    cur.execute("""
+    SELECT
+        report_date,
+        COUNT(*)
+    FROM daily_report
+    WHERE reporter=?
+    GROUP BY report_date
+    """, (real_name,))
+    for d, c in cur.fetchall():
+        line[d] = \
+            line.get(d, 0) + c
 
-    for row in cur.fetchall():
+    cur.execute("""
+    SELECT
+        meet_date,
+        COUNT(*)
+    FROM meeting
+    WHERE sponsor=?
+    GROUP BY meet_date
+    """, (real_name,))
 
-        line.append({
-            "date": row[0],
-            "count": row[1]
-        })
+    for d, c in cur.fetchall():
+        line[d] = \
+            line.get(d, 0) + c
+
+    cur.execute("""
+    SELECT
+        progress_date,
+        COUNT(*)
+    FROM project_progress
+    WHERE reporter=?
+    GROUP BY progress_date
+    """, (real_name,))
+    for d, c in cur.fetchall():
+        line[d] = \
+            line.get(d, 0) + c
+    line_data = []
+    for d in sorted(line.keys()):
+        line_data.append(
+            {
+                "date": d,
+                "count": line[d]
+            }
+        )
 
     conn.close()
+
+    trend7 = get_submit_trend(
+        real_name,
+        7
+    )
+
+    trend15 = get_submit_trend(
+        real_name,
+        15
+    )
+
+    trend30 = get_submit_trend(
+        real_name,
+        30
+    )
 
     return {
 
@@ -1189,7 +1294,11 @@ def get_dashboard_data(real_name):
 
         "pie": pie,
 
-        "line": line,
+        "trend7": trend7,
+
+        "trend15": trend15,
+
+        "trend30": trend30,
 
         "projects": projects,
 
@@ -1207,48 +1316,89 @@ def build_dashboard_v14(username, real_name):
         ensure_ascii=False
     )
 
-    line_json = json.dumps(
-        data["line"],
+    trend7_json = json.dumps(
+        data["trend7"],
+        ensure_ascii=False
+    )
+
+    trend15_json = json.dumps(
+        data["trend15"],
+        ensure_ascii=False
+    )
+
+    trend30_json = json.dumps(
+        data["trend30"],
         ensure_ascii=False
     )
 
     project_html = ""
 
     for p in data["projects"]:
-
         project_html += f"""
-        <div class="project-item">
+        <div
+        class="project-card"
+        onclick="openProjectDetail({p[0]})">
 
-            <span>{p[0]}</span>
+            <div class="project-name">
 
-            <span>{p[1]}%</span>
+                {p[1]}
+
+            </div>
+
+            <div class="project-progress">
+
+                当前进度 {p[2]}%
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
+                style="width:{p[2]}%">
+                </div>
+
+            </div>
 
         </div>
         """
 
     submit_html = ""
-
     for r in data["reports"]:
         submit_html += f"""
-        <div class="submit-item">
-            <div>
-                <b>{r[0]}</b>
+        <div
+        class="submit-card"
+
+        onclick="
+        openSubmitDetail(
+        '{r["type"]}',
+        {r["id"]}
+        )
+        ">
+
+            <div class="submit-type">
+
+                {r["type"]}
+
             </div>
-            <div>
-                {r[1][:30]}
+
+            <div class="submit-content">
+
+                {r["content"][:50]}
+
             </div>
+
+            <div class="submit-date">
+
+                {r["date"]}
+
+            </div>
+
         </div>
         """
 
-    ai_html = f"""
-    <div class="ai-analysis-card">
-
-        <h4>🤖 AI工作分析</h4>
-
-        <p>当前用户：{real_name}</p>
-
-        <p>AI分析模块开发中...</p>
-
+    ai_html = """
+    <div class="ai-placeholder">
+        点击AI分析开始生成
     </div>
     """
 
@@ -1260,6 +1410,23 @@ type="hidden"
 value="{real_name}"
 >
 
+    <input
+    id="trend7Data"
+    type="hidden"
+    value='{trend7_json}'
+    >
+    
+    <input
+    id="trend15Data"
+    type="hidden"
+    value='{trend15_json}'
+    >
+    
+    <input
+    id="trend30Data"
+    type="hidden"
+    value='{trend30_json}'
+    >
 <div class="v14-shell">
 
     <!-- 左侧菜单 -->
@@ -1421,9 +1588,7 @@ value="{real_name}"
                         </select>
             
                     </div>
-                    <div id="lineChart"
-                         data-chart='{line_json}'>
-
+                    <div id="lineChart">
                     </div>
 
                 </div>
@@ -1510,38 +1675,38 @@ value="{real_name}"
 
         <div id="page-project"
              class="page hidden">
-
-            <h3>
-
-                我的项目
-
-            </h3>
-
-            <div class="project-list">
-
-                {project_html}
-
+        
+            <div class="page-header">
+        
+                <h2>📁 我的项目</h2>
+        
+                <p>
+                    当前负责项目情况
+                </p>
+        
             </div>
-
+        
+            <div class="project-grid">
+        
+                {project_html}
+        
+            </div>
+        
         </div>
 
         <!-- 我的提交 -->
 
         <div id="page-submit"
              class="page hidden">
-
-            <h3>
-
-                最近提交
-
-            </h3>
-
-            <div class="submit-list">
-
-                {submit_html}
-
+            <div class="page-header">
+                <h2>📤 我的提交</h2>
+                <p>
+                    最近工作记录
+                </p>
             </div>
-
+            <div class="submit-list">
+                {submit_html}
+            </div>
         </div>
 
         <!-- AI分析 -->
@@ -1566,57 +1731,75 @@ value="{real_name}"
         <!-- 个人中心 -->
 
         <div id="page-profile"
-             class="page hidden">
+     class="page hidden">
 
-            <h3>
-
-                个人中心
-
-            </h3>
-
-            <div class="profile-card">
-
-                <p>
-
-                    姓名：{real_name}
-
-                </p>
-
-                <p>
-
-                    账号：{username}
-
-                </p>
-
-                <hr>
-
-                <h4>
-
-                    修改密码
-
-                </h4>
-
-                <input
-                id="oldPwd"
-                type="password"
-                placeholder="旧密码">
-
-                <input
-                id="newPwd"
-                type="password"
-                placeholder="新密码">
-
-                <button
-                onclick="changePassword()">
-
-                    修改密码
-
-                </button>
-
-                <div id="pwdResult"></div>
-
+            <div class="page-header">
+        
+                <h2>
+                    👤 个人中心
+                </h2>
+        
             </div>
-
+        
+            <div class="profile-wrapper">
+        
+                <div class="profile-info-card">
+        
+                    <div class="avatar">
+        
+                        {real_name[0]}
+        
+                    </div>
+        
+                    <div class="profile-info">
+        
+                        <div class="profile-name">
+        
+                            {real_name}
+        
+                        </div>
+        
+                        <div class="profile-account">
+        
+                            {username}
+        
+                        </div>
+        
+                    </div>
+        
+                </div>
+        
+                <div class="password-card">
+        
+                    <h3>
+        
+                        修改密码
+        
+                    </h3>
+        
+                    <input
+                    id="oldPwd"
+                    type="password"
+                    placeholder="请输入旧密码">
+        
+                    <input
+                    id="newPwd"
+                    type="password"
+                    placeholder="请输入新密码">
+        
+                    <button
+                    onclick="changePassword()">
+        
+                        修改密码
+        
+                    </button>
+        
+                    <div id="pwdResult"></div>
+        
+                </div>
+        
+            </div>
+        
         </div>
 
     </main>
@@ -1922,3 +2105,131 @@ def get_line_by_days(real_name, days=7):
         for r in rows
     ]
 
+def get_submit_trend(real_name, days):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    result = {}
+
+    # 日报
+
+    cur.execute(f"""
+    SELECT
+        report_date,
+        COUNT(*)
+    FROM daily_report
+    WHERE reporter=?
+    GROUP BY report_date
+    """,(real_name,))
+
+    for d,c in cur.fetchall():
+
+        result[d] = result.get(d,0)+c
+
+    # 会议
+
+    cur.execute(f"""
+    SELECT
+        meet_date,
+        COUNT(*)
+    FROM meeting
+    WHERE sponsor=?
+    GROUP BY meet_date
+    """,(real_name,))
+
+    for d,c in cur.fetchall():
+
+        result[d] = result.get(d,0)+c
+
+    # 项目进展
+
+    cur.execute(f"""
+    SELECT
+        progress_date,
+        COUNT(*)
+    FROM project_progress
+    WHERE reporter=?
+    GROUP BY progress_date
+    """,(real_name,))
+
+    for d,c in cur.fetchall():
+
+        result[d] = result.get(d,0)+c
+
+    conn.close()
+
+    rows=[]
+
+    for d in sorted(result.keys())[-days:]:
+
+        rows.append({
+
+            "date":d,
+
+            "count":result[d]
+
+        })
+
+    return rows
+
+def get_project_detail(project_id):
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT project_name,
+               progress,
+               main_leader,
+               developers,
+               testers,
+               risk_block,
+               update_time
+        FROM project
+        WHERE id=?
+    """, (project_id,))
+
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return {
+        "name": row[0],
+        "progress": row[1],
+        "leader": row[2],
+        "dev": row[3],
+        "test": row[4],
+        "risk": row[5],
+        "time": row[6]
+    }
+
+def get_submit_detail(submit_id):
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT reporter,
+               report_content,
+               report_date,
+               help_item
+        FROM daily_report
+        WHERE id=?
+    """, (submit_id,))
+
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return {
+        "user": row[0],
+        "content": row[1],
+        "date": row[2],
+        "help": row[3]
+    }
