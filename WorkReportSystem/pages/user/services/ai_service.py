@@ -2,6 +2,7 @@ import requests
 import re
 from datetime import datetime
 from common.db import get_project_conn
+import json
 
 # =========================
 # Ollama 配置
@@ -424,3 +425,456 @@ def ai_generate_weekly_report(real_name):
 
     return ask_ai(prompt)
 
+#AI日报
+def generate_ai_daily(user):
+
+    return f"""
+    <div class='ai-output'>
+
+    <h3>AI日报</h3>
+
+    今日完成：
+
+    1. Dashboard开发
+
+    2. 项目功能优化
+
+    3. AI助手集成
+
+    明日计划：
+
+    1. AI周报
+
+    2. AI项目分析
+
+    </div>
+    """
+
+
+#AI周报
+def generate_ai_weekly(user):
+
+    return """
+    <div class='ai-output'>
+
+    <h3>AI周报</h3>
+
+    本周完成：
+
+    Dashboard V15
+
+    项目管理
+
+    AI工作助手
+
+    </div>
+    """
+
+#AI项目总结
+def generate_project_summary(user):
+
+    return """
+    <div class='ai-output'>
+
+    <h3>项目总结</h3>
+
+    当前项目：
+
+    华智瑞森特工作流管理系统
+
+    当前状态：
+
+    开发中
+
+    风险：
+
+    无
+
+    </div>
+    """
+
+#AI会议记录
+def generate_ai_meeting_summary(real_name):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        select
+            meet_theme,
+            meet_content,
+            meet_result
+        from meeting
+        where sponsor=?
+        order by id desc
+        limit 1
+    """,(real_name,))
+
+    row = cur.fetchone()
+
+    conn.close()
+
+    if not row:
+
+        return """
+        <div class='ai-output'>
+
+        未找到会议记录
+
+        </div>
+        """
+
+    theme = row[0]
+    content = row[1]
+    result = row[2]
+
+    return f"""
+    <div class='ai-output'>
+
+    <h3>📅 AI会议纪要</h3>
+
+    <b>会议主题：</b><br>
+    {theme}
+
+    <br><br>
+
+    <b>会议内容总结：</b><br>
+    {content}
+
+    <br><br>
+
+    <b>会议结论：</b><br>
+    {result}
+
+    <br><br>
+
+    <b>AI提炼：</b><br>
+
+    会议主要围绕：
+    {theme}
+
+    展开讨论。
+
+    建议后续形成任务清单并持续跟踪。
+
+    </div>
+    """
+
+def calc_level(progress,risk,end_date):
+
+    score = 0
+
+    if progress < 30:
+        score += 40
+
+    elif progress < 60:
+        score += 20
+
+    if risk and risk != "无":
+        score += 40
+
+    try:
+
+        days = (
+            datetime.strptime(
+                end_date,
+                "%Y-%m-%d"
+            ) -
+            datetime.now()
+        ).days
+
+        if days < 7:
+            score += 30
+
+        elif days < 15:
+            score += 15
+
+    except:
+        pass
+
+    if score >= 70:
+        return "🔴 高风险"
+
+    elif score >= 40:
+        return "🟠 中风险"
+
+    return "🟢 低风险"
+
+def call_ollama(
+        prompt,
+        model="deepseek-r1:8b"
+):
+
+    try:
+
+        resp = requests.post(
+
+            "http://127.0.0.1:11434/api/generate",
+
+            json={
+
+                "model": model,
+
+                "prompt": prompt,
+
+                "stream": False
+
+            },
+
+            timeout=600
+
+        )
+
+        result = resp.json()
+
+        return result.get(
+            "response",
+            ""
+        )
+
+    except Exception as e:
+
+        return str(e)
+
+def generate_ai_risk_report(
+        real_name
+):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        select
+            project_name,
+            main_leader,
+            progress,
+            risk_block,
+            end_date
+        from project
+        where
+            main_leader like ?
+            or developers like ?
+            or testers like ?
+            or designer like ?
+            or structure_engineer like ?
+    """,
+    (
+        f"%{real_name}%",
+        f"%{real_name}%",
+        f"%{real_name}%",
+        f"%{real_name}%",
+        f"%{real_name}%"
+    ))
+
+    projects = cur.fetchall()
+
+    conn.close()
+
+    project_text = ""
+
+    for p in projects:
+
+        project_text += f"""
+项目名称:{p[0]}
+负责人:{p[1]}
+当前进度:{p[2]}
+风险:{p[3]}
+截止时间:{p[4]}
+----------------
+"""
+
+    prompt = f"""
+你是一名资深项目总监。
+
+请根据以下项目情况生成风险预警报告。
+
+要求输出：
+
+【项目名称】
+
+【风险等级】
+高风险/中风险/低风险
+
+【风险原因】
+
+【影响范围】
+
+【解决建议】
+
+【负责人】
+
+【预计延期天数】
+
+项目数据：
+
+{project_text}
+"""
+
+    result = call_ollama(
+
+        prompt,
+
+        model="deepseek-r1:8b"
+
+    )
+
+    return result
+
+#新增知识库搜索
+def search_user_knowledge(
+        question
+):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    result = []
+
+    q = f"%{question}%"
+
+    # 日报
+
+    cur.execute("""
+    select
+        report_date,
+        reporter,
+        report_content
+    from daily_report
+    where report_content like ?
+    limit 20
+    """,
+    (q,)
+    )
+
+    for r in cur.fetchall():
+
+        result.append(
+
+            f"""
+[日报]
+
+日期:{r[0]}
+
+人员:{r[1]}
+
+内容:
+
+{r[2]}
+"""
+        )
+
+    # 会议
+
+    cur.execute("""
+    select
+        meet_date,
+        sponsor,
+        meet_content
+    from meeting
+    where meet_content like ?
+    limit 20
+    """,
+    (q,)
+    )
+
+    for r in cur.fetchall():
+
+        result.append(
+
+            f"""
+[会议]
+
+日期:{r[0]}
+
+主持人:{r[1]}
+
+内容:
+
+{r[2]}
+"""
+        )
+
+    # 项目
+
+    cur.execute("""
+    select
+        project_name,
+        progress,
+        risk_block
+    from project
+    where
+        project_name like ?
+        or risk_block like ?
+    limit 20
+    """,
+    (q, q)
+    )
+
+    for r in cur.fetchall():
+
+        result.append(
+
+            f"""
+[项目]
+
+项目:
+
+{r[0]}
+
+进度:
+
+{r[1]}
+
+风险:
+
+{r[2]}
+"""
+        )
+
+    conn.close()
+
+    return "\n".join(result)
+
+#新增AI问答主函数
+def ai_rag_chat(
+        question
+):
+
+    knowledge = search_user_knowledge(
+        question
+    )
+
+    if knowledge:
+
+        prompt = f"""
+你是企业AI助手。
+
+优先依据知识库回答。
+
+知识库内容：
+
+{knowledge}
+
+用户问题：
+
+{question}
+
+要求：
+
+1. 优先引用知识库
+2. 如果知识库不足可结合常识补充
+3. 中文回答
+"""
+
+        return call_ollama(
+            prompt,
+            "deepseek-r1:8b"
+        )
+
+    return call_ollama(
+        question,
+        "deepseek-r1:8b"
+    )

@@ -152,15 +152,11 @@ from pages.user.services.dashboard_service import (
     get_submit_detail
 )
 
-from pages.user.ai_assistant.ai_page import (
-    create_ai_assistant_page
-)
+from pages.user.services.ai_service import *
 
 from pages.user.ai_assistant.ai_service import (
-    ai_daily,
-    ai_meeting,
-    ai_weekly,
-    ai_project
+    generate_project_analysis,
+    generate_risk_analysis
 )
 
 import json
@@ -966,27 +962,6 @@ with gr.Blocks(
        outputs=result_msg
     )
 
-    (
-        ai_page,
-
-        daily_input,
-        daily_btn,
-        daily_output,
-
-        meeting_input,
-        meeting_btn,
-        meeting_output,
-
-        weekly_btn,
-        weekly_output,
-
-        project_name,
-        project_btn,
-        project_output
-
-    ) = create_ai_assistant_page()
-
-
     def open_ai_page():
         return (
             gr.update(
@@ -997,46 +972,6 @@ with gr.Blocks(
             )
         )
 
-    daily_btn.click(
-
-        fn=ai_daily,
-
-        inputs=daily_input,
-
-        outputs=daily_output
-
-    )
-
-    meeting_btn.click(
-
-        fn=ai_meeting,
-
-        inputs=meeting_input,
-
-        outputs=meeting_output
-
-    )
-
-    weekly_btn.click(
-
-        fn=lambda x:
-        ai_weekly(x),
-
-        inputs=real_name_state,
-
-        outputs=weekly_output
-
-    )
-
-    project_btn.click(
-
-        fn=ai_project,
-
-        inputs=project_name,
-
-        outputs=project_output
-
-    )
 
     my_ai_btn.click(
         fn=build_my_project_ai_analysis,
@@ -1725,6 +1660,108 @@ with gr.Blocks(
         ]
     )
 
+    ai_daily_btn = gr.Button(
+        value="ai_daily",
+        elem_id="ai_daily_btn",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_weekly_btn = gr.Button(
+        value="ai_weekly",
+        elem_id="ai_weekly_btn",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_project_btn1 = gr.Button(
+        value="ai_project",
+        elem_id="ai_project_btn1",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_risk_btn = gr.Button(
+        value="ai_risk",
+        elem_id="ai_risk_btn",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_meeting_btn = gr.Button(
+        value="ai_meeting",
+        elem_id="ai_meeting_btn",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_chat_btn = gr.Button(
+        value="ai_chat",
+        elem_id="ai_chat_btn",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_result_box = gr.Textbox(
+        visible=False,
+        elem_id="ai_result_box"
+    )
+
+    ai_result_box.change(
+        None,
+        inputs=ai_result_box,
+        js="""
+        (text)=>{
+            window.dispatchEvent(
+                new CustomEvent(
+                    "ai-result-update",
+                    {detail:text}
+                )
+            );
+            return [];
+        }
+        """
+    )
+
+    ai_question_event = gr.Textbox(
+        visible=False,
+        elem_id="ai_question_event"
+    )
+
+    ai_daily_btn.click(
+        generate_ai_daily,
+        inputs=user_state,
+        outputs=ai_result_box
+    )
+
+    ai_weekly_btn.click(
+        generate_ai_weekly,
+        inputs=user_state,
+        outputs=ai_result_box
+    )
+
+    ai_project_btn1.click(
+        generate_project_summary,
+        inputs=user_state,
+        outputs=ai_result_box
+    )
+
+    ai_meeting_btn.click(
+        generate_ai_meeting_summary,
+        inputs=real_name_state,
+        outputs=ai_result_box
+    )
+
+    ai_risk_btn.click(
+        generate_ai_risk_report,
+        inputs=real_name_state,
+        outputs=ai_result_box
+    )
+
+    ai_question_event.change(
+
+        ai_rag_chat,
+
+        inputs=ai_question_event,
+
+        outputs=ai_result_box
+
+    )
+
     # ====================================================
     # 项目页 -> 工作台
     # ====================================================
@@ -1752,17 +1789,11 @@ with gr.Blocks(
             fn=None,
             js="""
             () => {
-        
                 setTimeout(()=>{
-        
                     if(window.initDashboardCharts){
-        
                         initDashboardCharts();
-        
                     }
-        
                 },500);
-        
             }
             """
         )
@@ -1794,17 +1825,11 @@ with gr.Blocks(
             fn=None,
             js="""
             () => {
-        
                 setTimeout(()=>{
-        
                     if(window.initDashboardCharts){
-        
                         initDashboardCharts();
-        
                     }
-        
                 },500);
-        
             }
             """
         )
@@ -1870,11 +1895,9 @@ with gr.Blocks(
     # ====================================================
     def open_ai_workflow():
         kpi1, kpi2, kpi3 = build_kpi_html()
-
         summary_html, risk_html, rank_html = (
             build_ai_side_panel()
         )
-
         return (
             gr.update(visible=False),
 
@@ -1921,10 +1944,8 @@ with gr.Blocks(
             点击生成经营分析
             </div>
             """,
-
             build_warning_html()
         )
-
 
     btn_cockpit.click(
         fn=open_cockpit,
@@ -1995,7 +2016,6 @@ with gr.Blocks(
             leader_page
         ]
     )
-
 
     # ====================================================
     # 驾驶舱返回到工作台

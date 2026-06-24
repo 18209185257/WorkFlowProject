@@ -1,90 +1,139 @@
 import gradio as gr
 
+def build_ai_page():
 
-def create_ai_assistant_page():
+    return """
+    <button
+        id="ai_daily_btn"
+        style="display:none">
+    </button>
 
-    with gr.Column(
-        visible=False
-    ) as ai_page:
+    <button
+        id="ai_weekly_btn"
+        style="display:none">
+    </button>
 
-        gr.HTML("""
-        <h2>🤖 AI工作助手</h2>
-        <p>
-        日报、会议纪要、周报、项目分析
-        </p>
-        """)
+    <button
+        id="ai_project_btn"
+        style="display:none">
+    </button>
 
-        with gr.Tabs():
+    <button
+        id="ai_risk_btn"
+        style="display:none">
+    </button>
 
-            with gr.Tab("AI日报助手"):
+    <button
+        id="ai_meeting_btn"
+        style="display:none">
+    </button>
 
-                daily_input = gr.Textbox(
-                    lines=8,
-                    label="输入今日工作内容"
-                )
+    <button
+        id="ai_chat_btn"
+        style="display:none">
+    </button>
+    <div id="page-ai" class="page hidden">
 
-                daily_btn = gr.Button(
-                    "生成日报"
-                )
+        <div class="page-header">
 
-                daily_output = gr.Textbox(
-                    lines=12
-                )
+            <h2>🤖 AI工作助手</h2>
 
-            with gr.Tab("AI会议纪要"):
+            <p>智能生成日报、周报、项目分析与风险预警</p>
 
-                meeting_input = gr.Textbox(
-                    lines=10,
-                    label="会议内容"
-                )
+        </div>
 
-                meeting_btn = gr.Button(
-                    "生成纪要"
-                )
+        <div class="ai-grid">
 
-                meeting_output = gr.Textbox(
-                    lines=12
-                )
+            <div class="ai-card"
+                 onclick="runAI('daily')">
 
-            with gr.Tab("AI周报"):
+                <div class="ai-icon">📄</div>
 
-                weekly_btn = gr.Button(
-                    "生成周报"
-                )
+                <div class="ai-title">
+                    AI日报生成
+                </div>
 
-                weekly_output = gr.Textbox(
-                    lines=15
-                )
+            </div>
 
-            with gr.Tab("项目分析"):
+            <div class="ai-card"
+                 onclick="runAI('weekly')">
 
-                project_name = gr.Textbox(
-                    label="项目名称"
-                )
+                <div class="ai-icon">📝</div>
 
-                project_btn = gr.Button(
-                    "分析项目"
-                )
+                <div class="ai-title">
+                    AI周报生成
+                </div>
 
-                project_output = gr.Textbox(
-                    lines=15
-                )
+            </div>
 
-    return (
-        ai_page,
+            <div class="ai-card"
+                 onclick="runAI('project')">
 
-        daily_input,
-        daily_btn,
-        daily_output,
+                <div class="ai-icon">📊</div>
 
-        meeting_input,
-        meeting_btn,
-        meeting_output,
+                <div class="ai-title">
+                    AI项目分析
+                </div>
 
-        weekly_btn,
-        weekly_output,
+            </div>
 
-        project_name,
-        project_btn,
-        project_output
-    )
+            <div class="ai-card"
+                 onclick="runAI('risk')">
+
+                <div class="ai-icon">⚠️</div>
+
+                <div class="ai-title">
+                    AI风险预警
+                </div>
+
+            </div>
+
+            <div class="ai-card"
+                 onclick="runAI('meeting')">
+
+                <div class="ai-icon">📅</div>
+
+                <div class="ai-title">
+                    AI会议纪要
+                </div>
+
+            </div>
+
+            <div class="ai-card"
+                 onclick="runAI('chat')">
+
+                <div class="ai-icon">💬</div>
+
+                <div class="ai-title">
+                    AI问答
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="ai-result"
+             class="ai-result">
+
+            点击功能开始分析...
+
+        </div>
+        
+        <div class="ai-chat-box">
+
+            <textarea
+                id="ai-question"
+                placeholder="请输入问题">
+            </textarea>
+        
+            <button
+                onclick="askAI()">
+        
+                提问
+        
+            </button>
+
+        </div>
+
+    </div>
+    """

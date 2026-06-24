@@ -3,6 +3,11 @@ from pages.user.services.my_project_service import get_user_project_dashboard
 from .ai_service import ai_dashboard_analysis,ai_generate_weekly_report
 import  requests
 from pages.leader.services.ai_business_service import call_llm
+from pages.user.dashboard.components.workbench import build_workbench_page
+from pages.user.dashboard.components.project import build_project_page
+from pages.user.dashboard.components.submit import build_submit_page
+from pages.user.ai_assistant.ai_page import build_ai_page
+from pages.user.dashboard.components.profile import build_profile_page
 
 # 提交类型统计
 import json
@@ -1203,12 +1208,9 @@ def get_dashboard_data(real_name):
     }
 
 def build_dashboard_v14(username, real_name):
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
-
     data = get_dashboard_data(real_name)
-
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
     project_detail_map = {}
-
     for p in data["projects"]:
         project_detail_map[p[0]] = {
             "id": p[0],
@@ -1219,7 +1221,6 @@ def build_dashboard_v14(username, real_name):
         }
 
     submit_detail_map = {}
-
     for r in data["reports"]:
         submit_detail_map[r["id"]] = {
             "id": r["id"],
@@ -1264,7 +1265,7 @@ def build_dashboard_v14(username, real_name):
 
     avatar_color = colors[
         hash(real_name) % len(colors)
-        ]
+    ]
 
     for idx, p in enumerate(data["projects"]):
         color = colors[idx % len(colors)]
@@ -1293,7 +1294,7 @@ def build_dashboard_v14(username, real_name):
             </div>
 
             <div class="p-end-date">
-                ⏰ {p[5]}
+                 {p[5]}
             </div>
 
         </div>
@@ -1331,34 +1332,34 @@ def build_dashboard_v14(username, real_name):
 
         </div>
         """
+    workbench_page = build_workbench_page(
+        real_name,
+        now,
+        data,
+        pie_json,
+        project_html,
+        submit_html
+    )
 
-    ai_html = f"""
-    <div class="ai-assistant-card">
+    project_page = build_project_page(
+        project_html
+    )
 
-        <div class="panel-title">
-            🤖 AI工作助手
-        </div>
+    submit_page = build_submit_page(
+        submit_html
+    )
 
-        <div class="ai-summary">
+    ai_page = build_ai_page(
 
-            {generate_dashboard_ai(real_name)}
+    )
 
-        </div>
+    profile_page = build_profile_page(
+        username,
+        real_name,
+        avatar_color
+    )
 
-        <button id="weekly_report_btn">
 
-            生成周报
-
-        </button>
-
-        <button id="project_ai_btn">
-
-            项目分析
-
-        </button>
-
-    </div>
-    """
     return f"""
     <div
         id="projectData"
@@ -1372,546 +1373,108 @@ def build_dashboard_v14(username, real_name):
         style="display:none">
     </div>
 
-
-<input
-id="dashboard-user"
-type="hidden"
-value="{real_name}"
->
-
     <input
-    id="trend7Data"
+    id="dashboard-user"
     type="hidden"
-    value='{trend7_json}'
+    value="{real_name}"
     >
     
-    <input
-    id="trend15Data"
-    type="hidden"
-    value='{trend15_json}'
-    >
+        <input
+        id="trend7Data"
+        type="hidden"
+        value='{trend7_json}'
+        >
+        
+        <input
+        id="trend15Data"
+        type="hidden"
+        value='{trend15_json}'
+        >
+        
+        <input
+        id="trend30Data"
+        type="hidden"
+        value='{trend30_json}'
+        >
+        <div class="v14-shell">
+        
+            <!-- 左侧菜单 -->
+        
+            <aside class="v14-sidebar">
+        
+                <div class="logo">
+        
+                    工作汇报平台
+        
+                </div>
+        
+                <div class="menu active"
+                     onclick="showPage('workbench',this)">
+        
+                    📊 工作台
+        
+                </div>
+        
+                <div class="menu"
+                     onclick="showPage('project',this)">
+        
+                    📁 我的项目
+        
+                </div>
+        
+                <div class="menu"
+                     onclick="showPage('submit',this)">
+        
+                    📤 我的提交
+        
+                </div>
+        
+                <div class="menu"
+                     onclick="showPage('ai',this)">
+                
+                    🤖 AI工作助手
+                
+                </div>
+        
+                <div class="menu"
+                     onclick="showPage('profile',this)">
+        
+                    👤 个人中心
+        
+                </div>
+        
+            </aside>
+
+            <!-- 右侧内容 -->
+        
+            <main class="v14-content">
+                
+                {workbench_page}
+
+                {project_page}
+            
+                {submit_page}
+                
+                {ai_page}
+            
+                {profile_page}
+
+           </main>
+
+       </div>
+    <script>
     
-    <input
-    id="trend30Data"
-    type="hidden"
-    value='{trend30_json}'
-    >
-<div class="v14-shell">
-
-    <!-- 左侧菜单 -->
-
-    <aside class="v14-sidebar">
-
-        <div class="logo">
-
-            工作汇报平台
-
-        </div>
-
-        <div class="menu active"
-             onclick="showPage('workbench',this)">
-
-            📊 工作台
-
-        </div>
-
-        <div class="menu"
-             onclick="showPage('project',this)">
-
-            📁 我的项目
-
-        </div>
-
-        <div class="menu"
-             onclick="showPage('submit',this)">
-
-            📤 我的提交
-
-        </div>
-
-        <div class="menu"
-             onclick="showPage('ai',this)">
-
-            🤖 AI助手
-
-        </div>
-
-        <div class="menu"
-             onclick="showPage('profile',this)">
-
-            👤 个人中心
-
-        </div>
-
-    </aside>
-
-    <!-- 右侧内容 -->
-
-    <main class="v14-content">
-
-        <!-- 工作台 -->
-
-        <div id="page-workbench"
-             class="page">
-
-            <div class="welcome-bar">
-
-                <div>
-
-                    <div class="welcome-title">
-                        欢迎回来，{real_name}
-                    </div>
-
-                    <div class="welcome-desc">
-                        今日工作状态总览
-                    </div>
-
-                </div>
-
-                <div class="welcome-date">
-                    {now}
-                </div>
-
-            </div>
-
-            <div class="kpi-row">
-
-                <div class="kpi-card">
-
-                    <div class="num">
-
-                        {data["total"]}
-
-                    </div>
-
-                    <div>总提交</div>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="num">
-
-                        {data["report"]}
-
-                    </div>
-
-                    <div>日报</div>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="num">
-
-                        {data["meeting"]}
-
-                    </div>
-
-                    <div>会议</div>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="num">
-
-                        {data["project"]}
-
-                    </div>
-
-                    <div>项目</div>
-
-                </div>
-
-            </div>
-
-            <div class="chart-row">
-
-                <div class="chart-card">
-                    <div class="chart-title">
-                        提交类型分布
-                    </div>
-
-                    <div id="pieChart"
-                         data-chart='{pie_json}'>
-
-                    </div>
-
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-
-                        <div class="chart-title">
-                            近7天提交趋势
-                        </div>
-            
-                        <select id="trendDays"
-                                onchange="reloadTrend(this.value)">
-            
-                            <option value="7">近7天</option>
-                            <option value="15">近15天</option>
-                            <option value="30">近30天</option>
-            
-                        </select>
-            
-                    </div>
-                    <div id="lineChart">
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="quick-row">
-
-                <div
-                    class="quick-card"
-                    onclick="
-                    document
-                    .getElementById(
-                        'daily_page_btn'
-                    )
-                    .click();
-                    ">
-                
-                    📄 日报填报
-                
-                </div>
-                
-                <div
-                    class="quick-card"
-                    onclick="
-                    document
-                    .getElementById(
-                        'meeting_page_btn'
-                    )
-                    .click();
-                    ">
-                
-                    📅 会议记录
-                
-                </div>
-                
-                <div
-                    class="quick-card"
-                    onclick="
-                    document
-                    .getElementById(
-                        'project_page_btn'
-                    )
-                    .click();
-                    ">
-                
-                    📊 项目进展
-                
-                </div>
-
-            </div>
-            
-            <div class="dashboard-bottom">
-
-                <div class="project-panel">
-
-                    <div class="panel-header">
-                
-                        <h3>
-                            我负责的项目
-                        </h3>
-                
-                        <div
-                        class="panel-link"
-                        onclick="showPage('project',this)">
-                        
-                        查看全部
-                        
-                        </div>
-                
-                    </div>
-                
-                    <div class="project-table-header">
-                
-                        <span>项目名称</span>
-                
-                        <span>进度</span>
-                
-                        <span>角色</span>
-                
-                        <span>截止时间</span>
-                
-                    </div>
-                
-                    {project_html}
-                
-                </div>
-            
-                <div class="submit-panel">
-
-                    <div class="panel-header">
-                
-                        <h3>
-                            最近提交记录
-                        </h3>
-                
-                        <div
-                            class="panel-link"
-                            onclick="showPage('submit',this)">
-                            
-                            查看全部
-                            
-                        </div>
-                
-                    </div>
-                
-                    <div class="submit-timeline">
-                
-                        {submit_html}
-                
-                    </div>
-                
-                </div>
-                
-            </div>
-
-        </div>
-        
-        <div
-    id="page-project-detail"
-    class="page hidden">
-
-            <div class="page-header">
-        
-                <button
-                    class="back-btn"
-                    onclick="showPage('project')">
-        
-                    ← 返回项目列表
-        
-                </button>
-        
-                <h2>项目详情</h2>
-        
-            </div>
-        
-            <div
-                id="projectDetailContainer">
-        
-            </div>
-        
-        </div>
-        
-        <div
-    id="page-submit-detail"
-    class="page hidden">
-
-            <div class="page-header">
-        
-                <button
-                    class="back-btn"
-                    onclick="showPage('submit')">
-        
-                    ← 返回提交记录
-        
-                </button>
-        
-                <h2>提交详情</h2>
-        
-            </div>
-        
-            <div
-                id="submitDetailContainer">
-        
-            </div>
-        
-        </div>
-
-        <!-- 我的项目 -->
-
-        <div id="page-project"
-             class="page hidden">
-        
-            <div class="page-header">
-        
-                <h2>📁 我的项目</h2>
-        
-                <p>
-                    当前负责项目情况
-                </p>
-        
-            </div>
-        
-           <div class="project-panel">
-
-                    <div class="panel-header">
-                
-                        <h3>
-                            我负责的项目
-                        </h3>
-                
-                    </div>
-                
-                    <div class="project-table-header">
-                
-                        <span>项目名称</span>
-                
-                        <span>进度</span>
-                
-                        <span>角色</span>
-                
-                        <span>截止时间</span>
-                
-                    </div>
-                
-                    {project_html}
-                
-                </div>
-        
-        </div>
-
-        <!-- 我的提交 -->
-
-        <div id="page-submit"
-             class="page hidden">
-            <div class="page-header">
-                <h2>📤 我的提交</h2>
-                <p>
-                    最近工作记录
-                </p>
-            </div>
-            <div class="submit-list">
-                {submit_html}
-            </div>
-        </div>
-
-        <!-- AI分析 -->
-
-        <div id="page-ai"
-             class="page hidden">
-
-            <h3>
-
-                AI分析
-
-            </h3>
-
-            <div class="ai-card">
-
-                {ai_html}
-
-            </div>
-
-        </div>
-
-        <!-- 个人中心 -->
-<div id="page-profile"
-     class="page hidden">
-
-    <div class="page-header">
-
-        <h2>👤 个人中心</h2>
-
-    </div>
-
-    <div class="profile-layout">
-
-        <!-- 左侧 -->
-
-        <div class="profile-left">
-
-            <div class="user-card">
-
-                <div
-                    class="avatar-big"
-                    style="background:{avatar_color};">
-                    
-                        {real_name[0]}
-                    
-                    </div>
-
-                <h3>{real_name}</h3>
-
-                <p>{username}</p>
-
-                <div class="user-info">
-
-                    <div>
-
-                        <label>身份</label>
-
-                        <span>员工</span>
-
-                    </div>
-
-                    <div>
-
-                        <label>最近登录</label>
-
-                        <span>{now}</span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- 右侧 -->
-
-        <div class="profile-right">
-
-            <div class="password-card">
-
-                <h3>
-
-                    安全设置
-
-                </h3>
-
-                <input
-                    id="oldPwd"
-                    type="password"
-                    placeholder="旧密码">
-
-                <input
-                    id="newPwd"
-                    type="password"
-                    placeholder="新密码">
-
-                <button
-                    onclick="changePassword()">
-
-                    修改密码
-
-                </button>
-
-                <div id="pwdResult"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-    </main>
-
-</div>
-<script>
-
-setTimeout(() => {{
-
-    if(window.afterDashboardRender){{
-
-        window.afterDashboardRender();
-
-    }}
-
-}},300);
-
-</script>
+    setTimeout(() => {{
+    
+        if(window.afterDashboardRender){{
+    
+            window.afterDashboardRender();
+    
+        }}
+    
+    }},300);
+    
+    </script>
 """
 
 def get_user_profile(username):

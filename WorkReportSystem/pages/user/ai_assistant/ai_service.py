@@ -1,18 +1,37 @@
-def ai_daily(text):
+from pages.user.ai_assistant.ai_db import (
+        get_user_daily_reports,
+        get_user_meetings,
+        get_user_project_progress
+)
+from pages.user.ai_assistant.ai_prompt import build_daily_prompt,build_weekly_prompt
 
-    return f"""
-【AI生成日报】
+def generate_ai_daily(real_name):
 
-今日工作：
+    reports = \
+        get_user_daily_reports(
+            real_name,
+            5
+        )
 
-{text}
+    meetings = \
+        get_user_meetings(
+            real_name,
+            5
+        )
 
-明日计划：
+    progresses = \
+        get_user_project_progress(
+            real_name
+        )
 
-1、继续推进当前任务
-2、完成测试验证
-3、同步项目进展
-"""
+    prompt = \
+        build_daily_prompt(
+            reports,
+            meetings,
+            progresses
+        )
+
+    return prompt
 
 
 def ai_meeting(text):
@@ -32,21 +51,30 @@ def ai_meeting(text):
 """
 
 
-def ai_weekly(real_name):
+def generate_ai_weekly(real_name):
 
-    return f"""
-【{real_name} 周报】
+    reports = \
+        get_user_daily_reports(
+            real_name,
+            50
+        )
 
-本周工作完成情况：
+    meetings = \
+        get_user_meetings(
+            real_name,
+            20
+        )
 
-日报：
-会议：
-项目：
+    progresses = \
+        get_user_project_progress(
+            real_name
+        )
 
-AI分析：
-
-整体工作推进正常。
-"""
+    return build_weekly_prompt(
+        reports,
+        meetings,
+        progresses
+    )
 
 
 def ai_project(project_name):
@@ -64,3 +92,16 @@ AI分析：
 
 3、定期同步风险
 """
+
+def generate_weekly_report(user):
+    pass
+    return f"""
+        开发中
+    """
+
+def generate_project_analysis(user):
+    pass
+
+
+def generate_risk_analysis(user):
+    pass
