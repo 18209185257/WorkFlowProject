@@ -154,16 +154,14 @@ from pages.user.services.dashboard_service import (
 
 from pages.user.services.ai_service import *
 
-from pages.user.ai_assistant.ai_service import (
-    generate_project_analysis,
-    generate_risk_analysis
-)
-
 import json
 import os
 from common.static_loader import load_js_files
-from common.db import get_project_conn,get_conn
-from fastapi import Body
+from pages.user.services.rag_service import (
+    rebuild_vector_db
+)
+
+from pages.user.services.agent_service import ai_agent
 
 # 初始化数据库
 init_db()
@@ -256,7 +254,8 @@ css_files = [
     "leader.css",
     "workflow_ai.css",
     "dashboard.css",
-    "dashboard-v14.css"
+    "dashboard-v14.css",
+    "ai.css"
 ]
 
 custom_css = ""
@@ -1696,6 +1695,8 @@ with gr.Blocks(
         elem_classes=["hidden-trigger"]
     )
 
+
+
     ai_result_box = gr.Textbox(
         visible=False,
         elem_id="ai_result_box"
@@ -1721,6 +1722,16 @@ with gr.Blocks(
         visible=False,
         elem_id="ai_question_event"
     )
+
+    ai_chat_btn.click(
+        ai_agent,
+        inputs=[
+            user_state,
+            ai_question_event
+        ],
+        outputs=ai_result_box
+    )
+
 
     ai_daily_btn.click(
         generate_ai_daily,
@@ -1760,6 +1771,15 @@ with gr.Blocks(
 
         outputs=ai_result_box
 
+    )
+
+    rebuild_vector_btn = gr.Button(
+        visible=False
+    )
+
+    rebuild_vector_btn.click(
+        rebuild_vector_db,
+        outputs=ai_result_box
     )
 
     # ====================================================

@@ -31,28 +31,37 @@
 }
 
 .ai-card:hover{
-
     transform:translateY(-3px);
-
     box-shadow:
         0 8px 24px rgba(0,0,0,.12);
-
 }
 
 .ai-icon{
-
     font-size:40px;
-
     margin-bottom:12px;
 
 }
 
 .ai-title{
-
     font-size:18px;
-
     font-weight:600;
+    color:white;
 
+}
+
+.ai-subtitle {
+    font-size:15px;
+    color:white;
+}
+
+.ai-suggest {
+    font-size:15px;
+    color:white;
+}
+
+.status-items {
+    font-size:15px;
+    color:white;
 }
 
 .ai-result{
@@ -71,3 +80,56 @@
         0 4px 12px rgba(0,0,0,.08);
 
 }
+
+.ai-container{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding:20px;
+}
+
+.ai-hero{
+    background: linear-gradient(135deg,#1677ff,#722ed1);
+    color:white;
+    padding:20px;
+    border-radius:16px;
+}
+
+.ai-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:12px;
+}
+
+.ai-card{
+    background:#fff;
+    padding:16px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.ai-card:hover{
+    transform:translateY(-2px);
+}
+
+.ai-chat-panel{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.ai-result-box{
+    min-height:200px;
+    background:#f6f8fa;
+    border-radius:12px;
+    padding:12px;
+}
+
+.ai-status{
+    background:#fff;
+    padding:12px;
+    border-radius:12px;
+}
+

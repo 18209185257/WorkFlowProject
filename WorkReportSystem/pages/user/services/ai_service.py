@@ -502,9 +502,9 @@ def generate_ai_meeting_summary(real_name):
 
     cur.execute("""
         select
-            meet_theme,
+            meet_title,
             meet_content,
-            meet_result
+            task_problem,
         from meeting
         where sponsor=?
         order by id desc
@@ -677,40 +677,40 @@ def generate_ai_risk_report(
     for p in projects:
 
         project_text += f"""
-项目名称:{p[0]}
-负责人:{p[1]}
-当前进度:{p[2]}
-风险:{p[3]}
-截止时间:{p[4]}
-----------------
-"""
+            项目名称:{p[0]}
+            负责人:{p[1]}
+            当前进度:{p[2]}
+            风险:{p[3]}
+            截止时间:{p[4]}
+            ----------------
+            """
 
     prompt = f"""
-你是一名资深项目总监。
-
-请根据以下项目情况生成风险预警报告。
-
-要求输出：
-
-【项目名称】
-
-【风险等级】
-高风险/中风险/低风险
-
-【风险原因】
-
-【影响范围】
-
-【解决建议】
-
-【负责人】
-
-【预计延期天数】
-
-项目数据：
-
-{project_text}
-"""
+    你是一名资深项目总监。
+    
+    请根据以下项目情况生成风险预警报告。
+    
+    要求输出：
+    
+    【项目名称】
+    
+    【风险等级】
+    高风险/中风险/低风险
+    
+    【风险原因】
+    
+    【影响范围】
+    
+    【解决建议】
+    
+    【负责人】
+    
+    【预计延期天数】
+    
+    项目数据：
+    
+    {project_text}
+    """
 
     result = call_ollama(
 

@@ -301,6 +301,27 @@ def init_db():
     )
     """)
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS ai_conversation(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        role TEXT,
+        content TEXT,
+        create_time TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS ai_memory(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        memory_type TEXT,
+        memory_content TEXT,
+        score REAL DEFAULT 1.0,
+        create_time TEXT
+    )
+    """)
+
     conn.commit()
     conn.close()
 

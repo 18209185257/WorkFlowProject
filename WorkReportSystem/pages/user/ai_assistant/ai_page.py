@@ -1,139 +1,96 @@
 import gradio as gr
 
 def build_ai_page():
-
     return """
-    <button
-        id="ai_daily_btn"
-        style="display:none">
-    </button>
+    <div id="page-ai"
+     class="page hidden">
+       <div class="ai-container">
 
-    <button
-        id="ai_weekly_btn"
-        style="display:none">
-    </button>
+           <!-- 顶部AI控制台 -->
+           <div class="ai-hero">
 
-    <button
-        id="ai_project_btn"
-        style="display:none">
-    </button>
+               <div class="ai-title">
+                   🤖 AI工作中枢
+               </div>
 
-    <button
-        id="ai_risk_btn"
-        style="display:none">
-    </button>
+               <div class="ai-subtitle">
+                   Copilot 企业智能办公系统
+               </div>
 
-    <button
-        id="ai_meeting_btn"
-        style="display:none">
-    </button>
+               <div class="status-items">
+                    <span class="ai-suggest">Qwen ✔</span>
+                    <span  class="ai-suggest">DeepSeek ✔</span>
+                    <span  class="ai-suggest">RAG ✔</span>
+                    <span  class="ai-suggest">Memory ✔</span>
+    
+                </div>
 
-    <button
-        id="ai_chat_btn"
-        style="display:none">
-    </button>
-    <div id="page-ai" class="page hidden">
+           </div>
+           
+           <div class="ai-grid">
 
-        <div class="page-header">
+                <div class="ai-card" onclick="runAI('daily')">
+                    📄 AI日报
+                </div>
+    
+                <div class="ai-card" onclick="runAI('weekly')">
+                    📝 AI周报
+                </div>
+    
+                <div class="ai-card" onclick="runAI('project')">
+                    📊 项目分析
+                </div>
+    
+                <div class="ai-card" onclick="runAI('risk')">
+                    ⚠️ 风险预警
+                </div>
+    
+                <div class="ai-card" onclick="runAI('meeting')">
+                    📅 会议纪要
+                </div>
+    
+                <div class="ai-card" onclick="runAI('chat')">
+                    💬 AI问答
+                </div>
 
-            <h2>🤖 AI工作助手</h2>
+           </div>
+           
+           <div class="ai-chat-panel">
 
-            <p>智能生成日报、周报、项目分析与风险预警</p>
+                <div id="ai-result"
+                     class="ai-result-box">
+    
+                    请输入问题或点击功能开始分析...
+    
+                </div>
+    
+                <div class="ai-input-box">
+    
+                    <textarea id="ai-question"
+                              placeholder="请输入你的问题...">
+                    </textarea>
+    
+                    <button onclick="askAI()">
+                        发送
+                    </button>
+    
+                </div>
 
-        </div>
+           </div>
+           
+            
+            <div class="ai-history">
 
-        <div class="ai-grid">
-
-            <div class="ai-card"
-                 onclick="runAI('daily')">
-
-                <div class="ai-icon">📄</div>
-
-                <div class="ai-title">
-                    AI日报生成
+                <div class="history-title">
+                    📚 最近AI记录
+                </div>
+    
+                <div id="ai-history-list">
+    
                 </div>
 
             </div>
 
-            <div class="ai-card"
-                 onclick="runAI('weekly')">
-
-                <div class="ai-icon">📝</div>
-
-                <div class="ai-title">
-                    AI周报生成
-                </div>
-
-            </div>
-
-            <div class="ai-card"
-                 onclick="runAI('project')">
-
-                <div class="ai-icon">📊</div>
-
-                <div class="ai-title">
-                    AI项目分析
-                </div>
-
-            </div>
-
-            <div class="ai-card"
-                 onclick="runAI('risk')">
-
-                <div class="ai-icon">⚠️</div>
-
-                <div class="ai-title">
-                    AI风险预警
-                </div>
-
-            </div>
-
-            <div class="ai-card"
-                 onclick="runAI('meeting')">
-
-                <div class="ai-icon">📅</div>
-
-                <div class="ai-title">
-                    AI会议纪要
-                </div>
-
-            </div>
-
-            <div class="ai-card"
-                 onclick="runAI('chat')">
-
-                <div class="ai-icon">💬</div>
-
-                <div class="ai-title">
-                    AI问答
-                </div>
-
-            </div>
-
-        </div>
-
-        <div id="ai-result"
-             class="ai-result">
-
-            点击功能开始分析...
-
-        </div>
-        
-        <div class="ai-chat-box">
-
-            <textarea
-                id="ai-question"
-                placeholder="请输入问题">
-            </textarea>
-        
-            <button
-                onclick="askAI()">
-        
-                提问
-        
-            </button>
-
-        </div>
-
+       </div>
     </div>
     """

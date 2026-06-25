@@ -621,59 +621,17 @@ function toggleProjectRow(row){
 }
 
 function runAI(type){
-
-    document
-        .getElementById("ai-result")
-        .innerHTML="AI分析中...";
-
-    if(type==="daily"){
-
-        document
-            .getElementById("ai_daily_btn")
-            .click();
-
-    }
-
-    if(type==="weekly"){
-
-        document
-            .getElementById("ai_weekly_btn")
-            .click();
-
-    }
-
-    if(type==="project"){
-
-        document
-            .getElementById("ai_project_btn1")
-            .click();
-
-    }
-
-    if(type==="risk"){
-
-        document
-            .getElementById("ai_risk_btn")
-            .click();
-
-    }
-
-    if(type==="meeting"){
-
-        document
-            .getElementById("ai_meeting_btn")
-            .click();
-
-    }
-
-    if(type==="chat"){
-
-        document
-            .getElementById("ai_chat_btn")
-            .click();
-
-    }
-
+     const box = document.getElementById("ai-result");
+     box.innerHTML = "🤖 AI分析中，请稍等...";
+     if(type==="project"){
+         document.getElementById(
+        "ai_" + type + "_btn1"
+     ).click();
+     }else{
+         document.getElementById(
+        "ai_" + type + "_btn"
+     ).click();
+     }
 }
 
 function askAI(){
