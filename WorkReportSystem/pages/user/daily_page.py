@@ -27,7 +27,6 @@ def create_daily_page():
             with gr.Row():
                 reporter = gr.Textbox(
                     label="汇报人",
-                    interactive=False
                 )
 
                 report_date = gr.Textbox(
@@ -77,14 +76,22 @@ def create_daily_page():
             )
 
             submit_btn.click(
+
                 submit_report,
-                [
+
+                inputs=[
                     reporter,
                     content,
                     report_date,
                     help_item
                 ],
-                None
+
+                outputs=[
+                    content,
+                    report_date,
+                    help_item
+                ]
+
             )
 
     return (

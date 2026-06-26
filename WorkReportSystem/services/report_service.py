@@ -96,10 +96,9 @@ def submit_report(
         data=data
     )
 
-    gr.Info("日报提交成功")
-
-    return  (
+    return (
         "",
         TODAY,
-        ""
+        "",
+        gr.Info("日报提交成功")
     )

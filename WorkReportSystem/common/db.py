@@ -5,6 +5,18 @@ from fastapi import FastAPI, Query, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 import re
 import json
+import sys
+from pathlib import Path
+from fastapi import Request
+
+# 获取项目根目录 WorkReportSystem
+root_path = Path(__file__).parent.parent
+sys.path.append(str(root_path))
+
+from pages.user.services.rag.vector_writer import (
+    upsert_vector
+)
+
 # 启动 main.py
 from common.config import (
     DB_PATH,
@@ -388,8 +400,10 @@ def db_insert(sql: str, params: tuple):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute(sql, params)
+    insert_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return insert_id
 
 def user_db_query(
         sql: str,
@@ -485,7 +499,41 @@ def add_project(
                     risk_block,
                     datetime.now().strftime("%Y-%m-%d")
                 ))
+    project_id = cur.lastrowid
     conn.commit()
+    upsert_vector(
+
+        doc_id=f"project_{project_id}",
+
+        content=f"""
+    项目名称：{project_name}
+
+    负责人：{main_leader}
+
+    项目进展：
+
+    {progress}
+
+    风险：
+
+    {risk_block}
+
+    是否延期：
+
+    {is_delay}
+    """,
+
+        metadata={
+
+            "type": "project",
+
+            "project_id": project_id,
+
+            "project_name": project_name
+
+        }
+
+    )
     conn.close()
     return {"code":200}
 
@@ -502,7 +550,44 @@ def add_meeting(
     check_token(token)
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     sql = '''INSERT INTO meeting(meet_title,sponsor,attendees,meet_date,meet_content,task_problem,create_time)VALUES (?,?,?,?,?,?,?)'''
-    db_insert(sql, (meet_title, sponsor, attendees, meet_date, meet_content, task_problem, now))
+    meeting_id =db_insert(sql, (meet_title, sponsor, attendees, meet_date, meet_content, task_problem, now))
+    upsert_vector(
+
+        doc_id=f"meeting_{meeting_id}",
+
+        content=f"""
+    会议主题：
+
+    {meet_title}
+
+    主持人：
+
+    {sponsor}
+
+    参会人员：
+
+    {attendees}
+
+    会议内容：
+
+    {meet_content}
+
+    问题及任务：
+
+    {task_problem}
+    """,
+
+        metadata={
+
+            "type": "meeting",
+
+            "sponsor": sponsor,
+
+            "date": meet_date
+
+        }
+
+    )
     return {"code": 200, "msg": "会议记录提交成功"}
 
 @app.post("/api/add_report")
@@ -519,7 +604,34 @@ def add_report(
     else:
         save_date = datetime.now().strftime("%Y-%m-%d")
     sql = '''INSERT INTO daily_report(reporter,report_content,report_date,help_item)VALUES (?,?,?,?)'''
-    db_insert(sql, (reporter, report_content, save_date, help_item))
+    report_id = db_insert(sql, (reporter, report_content, save_date, help_item))
+    upsert_vector(
+
+        doc_id=f"daily_{report_id}",
+
+        content=f"""
+    日报人：{reporter}
+
+    日报内容：
+
+    {report_content}
+
+    需协助事项：
+
+    {help_item}
+    """,
+
+        metadata={
+
+            "type": "daily",
+
+            "user": reporter,
+
+            "date": save_date
+
+        }
+
+    )
     return {"code": 200, "msg": "日报提交成功"}
 
 # 当日汇总
@@ -1074,6 +1186,71 @@ def delete_project(
         "code":200
     }
 
+@app.post(
+    "http://127.0.0.1:8000/api/user/change_password"
+)
+async def change_password_api(
+        request:Request
+):
+
+    data = await request.json()
+
+    username = data.get("user")
+
+    old_pwd = data.get("old_pwd")
+
+    new_pwd = data.get("new_pwd")
+
+    conn = sqlite3.connect(
+        DB_PATH
+    )
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        select password
+        from user
+        where username=?
+        """,
+        (
+            username,
+        )
+    )
+
+    row = cur.fetchone()
+
+    if not row:
+
+        return {
+            "msg":"用户不存在"
+        }
+
+    if row[0] != old_pwd:
+
+        return {
+            "msg":"原密码错误"
+        }
+
+    cur.execute(
+        """
+        update user
+        set password=?
+        where username=?
+        """,
+        (
+            new_pwd,
+            username
+        )
+    )
+
+    conn.commit()
+
+    conn.close()
+
+    return {
+        "msg":"密码修改成功"
+    }
 
 
 if __name__ == "__main__":

@@ -1273,63 +1273,37 @@ def build_dashboard_v14(username, real_name):
         role = "负责人"
 
         project_html += f"""
-        <div
-        class="project-row"
-        onclick="toggleProjectRow(this)">
-
-            <div class="p-name">
-                {p[1]}
+        <div class="project-row">
+            <div class="p-name">{p[1]}</div>
+            <div class="p-progress-wrap" onclick="toggleProjectRow(this)">
+                <!-- 完整文字包含所有换行，默认隐藏 -->
+                <div class="full-text">{p[3]}</div>
             </div>
-
-            <div
-                class="p-progress"
-                data-short="{p[3][:30]}..."
-                data-full="{p[3]}"
-                data-opened="0">
-                {p[3][:30]}...
-            </div>
-
-            <div class="p-role">
-                {role}
-            </div>
-
-            <div class="p-end-date">
-                 {p[5]}
-            </div>
-
+            <div class="p-role">{role}</div>
+            <div class="p-end-date">{p[5]}</div>
         </div>
         """
 
     submit_html = ""
-
     for r in data["reports"]:
         submit_html += f"""
-        <div
-        class="submit-row"
-        onclick="toggleSubmitRow(this)">
-
+        <div class="submit-row">
             <div class="submit-dot">
                 📄
             </div>
-
             <div class="submit-info">
-
                 <div class="submit-title">
                     {r["date"]}
                 </div>
-
+                <!-- 点击绑定在描述文字上 -->
                 <div
                     class="submit-desc"
-                    data-short="{r['content'][:60]}..."
+                    onclick="toggleSubmitRow(this)"
                     data-full="{r['content']}"
                     data-opened="0">
-            
-                    {r['content'][:60]}...
-            
+                    {r['content']}
                 </div>
-
             </div>
-
         </div>
         """
     workbench_page = build_workbench_page(
@@ -1755,15 +1729,24 @@ def get_submit_trend(real_name, days):
     result = {}
 
     # 日报
-
-    cur.execute(f"""
-    SELECT
-        report_date,
-        COUNT(*)
-    FROM daily_report
-    WHERE reporter=?
-    GROUP BY report_date
-    """,(real_name,))
+    cur.execute(
+        """
+        select
+            report_date,
+            count(*)
+        from daily_report
+        where reporter=?
+        and report_date>=date(
+            'now',
+            ?
+        )
+        group by report_date
+        """,
+        (
+            real_name,
+            f"-{days} day"
+        )
+    )
 
     for d,c in cur.fetchall():
 

@@ -163,6 +163,10 @@ from pages.user.services.rag_service import (
 
 from pages.user.services.agent_service import ai_agent
 
+from pages.user.services.password_service import (
+    change_password
+)
+
 # 初始化数据库
 init_db()
 
@@ -378,32 +382,32 @@ with gr.Blocks(
         dashboard_html
     ) = create_dashboard_page()
 
-    (
-        profile_page,
-
-        profile_username,
-
-        profile_real_name,
-
-        profile_role,
-
-        new_pwd,
-
-        save_pwd_btn,
-
-        pwd_result,
-
-        back_my_profile
-    ) = create_my_profile_page()
-
-    save_pwd_btn.click(
-        update_user_password,
-        inputs=[
-            user_state,
-            new_pwd
-        ],
-        outputs=pwd_result
-    )
+    # (
+    #     profile_page,
+    #
+    #     profile_username,
+    #
+    #     profile_real_name,
+    #
+    #     profile_role,
+    #
+    #     new_pwd,
+    #
+    #     save_pwd_btn,
+    #
+    #     pwd_result,
+    #
+    #     back_my_profile
+    # ) = create_my_profile_page()
+    #
+    # save_pwd_btn.click(
+    #     update_user_password,
+    #     inputs=[
+    #         user_state,
+    #         new_pwd
+    #     ],
+    #     outputs=pwd_result
+    # )
 
     # ==========================
     # 项目页
@@ -484,15 +488,15 @@ with gr.Blocks(
     # ==========================
     # 修改密码页
     # ==========================
-    (
-        password_page,
-        back_password,
-        old_pwd,
-        new_pwd,
-        confirm_pwd,
-        submit_btn,
-        pwd_result
-    ) = create_password_page()
+    # (
+    #     password_page,
+    #     back_password,
+    #     old_pwd,
+    #     new_pwd,
+    #     confirm_pwd,
+    #     submit_btn,
+    #     pwd_result
+    # ) = create_password_page()
 
     (
         leader_page,
@@ -896,16 +900,16 @@ with gr.Blocks(
             )
         )
 
-    back_my_profile.click(
-        lambda: (
-            gr.update(visible=True),
-            gr.update(visible=False)
-        ),
-        outputs=[
-            dashboard_page,
-            profile_page
-        ]
-    )
+    # back_my_profile.click(
+    #     lambda: (
+    #         gr.update(visible=True),
+    #         gr.update(visible=False)
+    #     ),
+    #     outputs=[
+    #         dashboard_page,
+    #         profile_page
+    #     ]
+    # )
 
     (
         my_project_page,
@@ -1110,28 +1114,28 @@ with gr.Blocks(
         raise gr.Error(msg)
 
 
-    submit_btn.click(
-        change_pwd_and_logout,
-        inputs=[
-            user_state,
-            old_pwd,
-            new_pwd,
-            confirm_pwd
-        ],
-        outputs=[
-
-            user_state,
-            role_state,
-
-            login_page,
-            dashboard_page,
-            leader_page,
-            password_page,
-
-            current_user,
-            logout_btn
-        ]
-    )
+    # submit_btn.click(
+    #     change_pwd_and_logout,
+    #     inputs=[
+    #         user_state,
+    #         old_pwd,
+    #         new_pwd,
+    #         confirm_pwd
+    #     ],
+    #     outputs=[
+    #
+    #         user_state,
+    #         role_state,
+    #
+    #         login_page,
+    #         dashboard_page,
+    #         leader_page,
+    #         password_page,
+    #
+    #         current_user,
+    #         logout_btn
+    #     ]
+    # )
 
 
     def save_user(data):
@@ -1202,7 +1206,8 @@ with gr.Blocks(
                 gr.update(),
                 gr.update(),
 
-                "用户名或密码错误"
+                "用户名或密码错误",
+                ""
             )
 
         role = result[0]
@@ -1210,6 +1215,7 @@ with gr.Blocks(
 
         if not real_name:
             real_name = user
+        reporter.value = real_name
 
         print(
             "登录用户:",
@@ -1236,7 +1242,8 @@ with gr.Blocks(
 
                 gr.update(visible=True),
 
-                ""
+                "",
+                real_name
             )
 
         return (
@@ -1256,7 +1263,8 @@ with gr.Blocks(
 
             gr.update(visible=True),
 
-            ""
+            "",
+            real_name
         )
 
     def show_register():
@@ -1290,7 +1298,8 @@ with gr.Blocks(
             current_user,
             logout_btn,
 
-            login_msg
+            login_msg,
+            reporter
         ]
     ).then(
         fn=build_dashboard_v14,
@@ -1477,7 +1486,7 @@ with gr.Blocks(
             gr.update(visible=False),  # project_page
             gr.update(visible=False),  # meeting_page
             gr.update(visible=False),  # daily_page
-            gr.update(visible=False),  # password_page
+            # gr.update(visible=False),  # password_page
 
             gr.update(
                 value="",
@@ -1503,7 +1512,7 @@ with gr.Blocks(
             project_page,
             meeting_page,
             daily_page,
-            password_page,
+            # password_page,
 
             current_user,
             logout_btn
@@ -1705,6 +1714,7 @@ with gr.Blocks(
     ai_result_box.change(
         None,
         inputs=ai_result_box,
+        outputs=ai_result_box,
         js="""
         (text)=>{
             window.dispatchEvent(
@@ -1719,18 +1729,54 @@ with gr.Blocks(
     )
 
     ai_question_event = gr.Textbox(
-        visible=False,
-        elem_id="ai_question_event"
+        value="",
+        visible=True,
+        elem_id="ai_question_event",
+        elem_classes=["hidden-trigger"]
     )
 
+    # ai_chat_btn.click(
+    #     ai_agent,
+    #     inputs=[
+    #         user_state,
+    #         ai_question_event
+    #     ],
+    #     outputs=ai_result_box
+    # )
+
     ai_chat_btn.click(
+        lambda u, q: print(
+            "触发成功",
+            u,
+            q
+        ),
+        inputs=[
+            user_state,
+            ai_question_event
+        ]
+    )
+
+    ai_send_btn = gr.Button(
+        value="send",
+        visible=True,
+        elem_id="ai_send_btn",
+        elem_classes=["hidden-trigger"]
+    )
+
+    ai_send_btn.click(
+
         ai_agent,
+
         inputs=[
             user_state,
             ai_question_event
         ],
+
         outputs=ai_result_box
+
     )
+
+    print(type(ai_question_event))
 
 
     ai_daily_btn.click(
@@ -1763,15 +1809,15 @@ with gr.Blocks(
         outputs=ai_result_box
     )
 
-    ai_question_event.change(
+    # ai_question_event.change(
+    #     ai_rag_chat,
+    #     inputs=ai_question_event,
+    #     outputs=ai_result_box
+    # )
 
-        ai_rag_chat,
-
-        inputs=ai_question_event,
-
-        outputs=ai_result_box
-
-    )
+    # pwd_result = gr.Textbox(
+    #     elem_id="pwd_result"
+    # )
 
     rebuild_vector_btn = gr.Button(
         visible=False
@@ -1781,6 +1827,56 @@ with gr.Blocks(
         rebuild_vector_db,
         outputs=ai_result_box
     )
+
+    change_pwd_btn = gr.Button(
+
+        value="change_pwd",
+
+        elem_id="change_pwd_btn",
+
+        elem_classes=["hidden-trigger"]
+
+    )
+
+    old_pwd_event = gr.Textbox(
+        value="",
+        elem_id="old_pwd_event",
+        elem_classes=["hidden-trigger"]
+    )
+
+    new_pwd_event = gr.Textbox(
+        value="",
+        elem_id="new_pwd_event",
+        elem_classes=["hidden-trigger"]
+    )
+    trigger = gr.State()  # 状态变量接收成功标记
+    click_event = change_pwd_btn.click(
+        change_password,
+        inputs=[
+            user_state,
+            old_pwd_event,
+            new_pwd_event
+        ],
+        outputs=[trigger]
+    )
+
+    click_event.then(
+        fn=lambda x: None,
+        inputs=[trigger],
+        outputs=[],
+        js="""
+            function(success) {
+                if (success) {
+                    alert("密码修改成功，请重新登录");
+                    // 刷新当前页面
+                    window.location.reload();
+                    // 跳登录页替换上面：window.location.href="/login";
+                }
+            }
+            """
+    )
+
+
 
     # ====================================================
     # 项目页 -> 工作台
@@ -1899,16 +1995,16 @@ with gr.Blocks(
     # ====================================================
     # 修改密码 -> 工作台
     # ====================================================
-    back_password.click(
-        lambda: (
-            gr.update(visible=True),
-            gr.update(visible=False)
-        ),
-        outputs=[
-            dashboard_page,
-            password_page
-        ]
-    )
+    # back_password.click(
+    #     lambda: (
+    #         gr.update(visible=True),
+    #         gr.update(visible=False)
+    #     ),
+    #     outputs=[
+    #         dashboard_page,
+    #         password_page
+    #     ]
+    # )
 
     # ====================================================
     # AI工作流查询

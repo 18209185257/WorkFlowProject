@@ -29,7 +29,7 @@ def build_profile_page(
                     class="avatar-big"
                     style="background:{avatar_color};">
                     
-                        {real_name[0]}
+                        {real_name[0] if real_name else "U"}
                     
                     </div>
 

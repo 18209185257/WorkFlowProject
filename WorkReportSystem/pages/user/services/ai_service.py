@@ -842,6 +842,9 @@ def search_user_knowledge(
 def ai_rag_chat(
         question
 ):
+    print(question)
+    if not question:
+        return "请输入问题"
 
     knowledge = search_user_knowledge(
         question

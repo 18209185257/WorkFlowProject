@@ -1,5 +1,7 @@
 from .ai_memory_service import save_conversation,build_ai_context,clean_old_conversation
 import requests
+import json
+import re
 from .hybrid_rag_service import (
     hybrid_search
 )
@@ -12,6 +14,9 @@ from .model_router import (
 from .ollama_service import (
     call_model
 )
+
+from .prompt_builder import build_prompt
+
 
 def generate_ai_chat(username, question):
 
@@ -102,3 +107,48 @@ def generate_ai_chat(username, question):
     )
 
     return answer
+
+def generate_ai_chat_stream(
+        username,
+        question
+):
+    yield "🤖 AI思考中..."
+
+    prompt = build_prompt(username, question)
+
+    response = requests.post(
+        OLLAMA_URL,
+        json={
+            "model": "qwen2.5:7b",
+            "prompt": prompt,
+            "stream": True
+        },
+        stream=True,
+        timeout=600
+    )
+
+    answer = ""
+
+    for line in response.iter_lines():
+
+        if not line:
+            continue
+
+        data = json.loads(line.decode())
+
+        chunk = data.get("response", "")
+
+        answer += chunk
+
+        clean = re.sub(
+            r"<think>.*?</think>",
+            "",
+            answer,
+            flags=re.S
+        )
+
+        yield clean
+
+    # 结束状态（关键）
+    yield clean
+

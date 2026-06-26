@@ -15,6 +15,10 @@ from .master_agent import (
     build_final_answer
 )
 
+from common.db import get_project_conn
+
+import re
+
 from .ai_service import (
     generate_project_summary,
     generate_ai_risk_report,
@@ -55,17 +59,43 @@ def ai_agent(
         username,
         question
 ):
-    if not question:
-        return "请输入问题"
+    print(
+        "======== AI_AGENT ========"
+    )
+
+    print(
+        username
+    )
+
+    print(
+        question
+    )
+
+    target_name = extract_real_name(
+        question
+    )
+
+    if target_name:
+        username = target_name
 
     plans = plan_task(
         question
+    )
+
+    print(
+        "任务规划:",
+        plans
     )
 
     results = execute_plans(
         username,
         question,
         plans
+    )
+
+    print(
+        "执行结果:",
+        results
     )
 
     return build_final_answer(
@@ -97,3 +127,114 @@ def execute_tool(
     return func(
         username
     )
+
+def extract_name(question):
+
+    stop_words = [
+
+        "工作总结",
+
+        "最近工作",
+
+        "近期工作",
+
+        "本周工作",
+
+        "本月工作",
+
+        "工作情况",
+
+        "工作概览",
+
+        "工作汇报",
+
+        "总结",
+
+        "的"
+
+    ]
+
+    q = question
+
+    for word in stop_words:
+
+        q = q.replace(
+            word,
+            ""
+        )
+
+    q = q.strip()
+
+    names = re.findall(
+
+        r'[\u4e00-\u9fa5]{2,4}',
+
+        q
+
+    )
+
+    if names:
+
+        return names[0]
+
+    return None
+
+
+def extract_real_name(
+        question
+):
+
+    conn = get_project_conn()
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        select real_name
+        from user
+        """
+    )
+
+    users = cur.fetchall()
+
+    conn.close()
+
+    for row in users:
+
+        real_name = row[0]
+
+        if (
+            real_name
+            and
+            real_name in question
+        ):
+            return real_name
+
+    return None
+
+def get_user_real_name(username, question):
+
+    # 1️⃣ 优先：问题中匹配真实姓名
+    real_name = extract_real_name(question)
+
+    if real_name:
+        return real_name
+
+    # 2️⃣ fallback：登录用户
+    conn = get_project_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        select real_name
+        from user
+        where username=?
+    """, (username,))
+
+    row = cur.fetchone()
+
+    conn.close()
+
+    if row:
+        return row[0]
+
+    return username

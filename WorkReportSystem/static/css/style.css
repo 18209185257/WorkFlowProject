@@ -76,6 +76,12 @@ body{
     overflow-x:hidden;
     overflow-y:auto;
     height:95%;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none !important;
 }
 
 .register-link-text{

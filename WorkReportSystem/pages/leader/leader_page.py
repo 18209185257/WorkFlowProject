@@ -475,23 +475,6 @@ body,
             value=build_overview_html("all")
         )
 
-        # range_type = gr.Radio(
-        #     [
-        #         ("全部", "all"),
-        #         ("今日", "today"),
-        #         ("本周", "week"),
-        #         ("本月", "month")
-        #     ],
-        #     value="all",
-        #     label="统计范围"
-        # )
-        #
-        # range_type.change(
-        #     fn=build_overview_html,
-        #     inputs=range_type,
-        #     outputs=overview_html
-        # )
-
         gr.HTML("""
         <div class="section-title">
         🚀 功能中心
@@ -698,19 +681,6 @@ body,
                     elem_id="user_hidden_btn",
                     elem_classes=["hidden-btn"]
                 )
-        # 系统动态
-        gr.HTML("""
-<div class="section-title">
-📢 系统动态
-</div>
-
-<div class="notice-card">
-    <p>✅ AI工作流查询系统已上线</p>
-    <p>✅ 项目进度智能分析已启用</p>
-    <p>✅ 会议纪要智能汇总已启用</p>
-    <p>✅ 日报自动总结功能已启用</p>
-</div>
-""")
 
         def refresh_overview(range_type):
             return build_overview_html(range_type)

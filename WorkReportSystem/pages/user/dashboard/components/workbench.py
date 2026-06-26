@@ -198,8 +198,9 @@ def build_workbench_page(
                         <span>截止时间</span>
                 
                     </div>
-                
-                    {project_html}
+                    <div class="project_list">
+                       {project_html}
+                    </div>
                 
                 </div>
             

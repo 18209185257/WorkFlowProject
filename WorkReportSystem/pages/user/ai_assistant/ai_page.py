@@ -10,11 +10,7 @@ def build_ai_page():
            <div class="ai-hero">
 
                <div class="ai-title">
-                   🤖 AI工作中枢
-               </div>
-
-               <div class="ai-subtitle">
-                   Copilot 企业智能办公系统
+                   🤖 基于AI大模型的智能办公系统
                </div>
 
                <div class="status-items">
@@ -56,6 +52,12 @@ def build_ai_page():
            </div>
            
            <div class="ai-chat-panel">
+               <div id="ai-status-bar"
+                     class="ai-status-bar">
+                
+                    🤖 AI分析中...
+                
+                </div>
 
                 <div id="ai-result"
                      class="ai-result-box">
@@ -77,19 +79,6 @@ def build_ai_page():
                 </div>
 
            </div>
-           
-            
-            <div class="ai-history">
-
-                <div class="history-title">
-                    📚 最近AI记录
-                </div>
-    
-                <div id="ai-history-list">
-    
-                </div>
-
-            </div>
 
        </div>
     </div>

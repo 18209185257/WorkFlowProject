@@ -184,59 +184,61 @@ function initDashboardCharts(){
 // 修改密码
 // =========================
 
-async function changePassword(){
-
-    const user =
-        document.getElementById(
-            "dashboard-user"
-        ).value;
+function changePassword(){
 
     const oldPwd =
+
         document.getElementById(
             "oldPwd"
         ).value;
 
     const newPwd =
+
         document.getElementById(
             "newPwd"
         ).value;
 
-    const res =
-        await fetch(
+    const oldBox =
 
-            "/api/user/change_password",
-
-            {
-                method:"POST",
-
-                headers:{
-                    "Content-Type":
-                    "application/json"
-                },
-
-                body:JSON.stringify({
-
-                    user:user,
-
-                    old_pwd:oldPwd,
-
-                    new_pwd:newPwd
-
-                })
-
-            }
-
+        document.querySelector(
+            "#old_pwd_event textarea"
         );
 
-    const data =
-        await res.json();
+    const newBox =
 
-    document.getElementById(
-        "pwdResult"
-    ).innerHTML = data.msg;
+        document.querySelector(
+            "#new_pwd_event textarea"
+        );
+
+    oldBox.value = oldPwd;
+
+    newBox.value = newPwd;
+
+    oldBox.dispatchEvent(
+
+        new Event(
+            "input",
+            {bubbles:true}
+        )
+
+    );
+
+    newBox.dispatchEvent(
+
+        new Event(
+            "input",
+            {bubbles:true}
+        )
+
+    );
+
+    document
+    .getElementById(
+        "change_pwd_btn"
+    )
+    .click();
 
 }
-
 
 window.afterDashboardRender = function () {
 
@@ -634,29 +636,50 @@ function runAI(type){
      }
 }
 
-function askAI(){
+function askAI() {
 
-    const q =
-    document.getElementById(
-        "ai-question"
-    ).value;
+    const input =
+        document.getElementById("ai-question");
 
-    document
-      .getElementById(
-        "ai_question_event"
-      )
-      .value = q;
+    const question = input.value;
 
-    document
-      .getElementById(
-        "ai_question_event"
-      )
-      .dispatchEvent(
-        new Event(
-          "input",
-          {bubbles:true}
-        )
-      );
+    if (!question) return;
+
+    const eventBox =
+        document.getElementById("ai_question_event");
+
+    if (!eventBox) {
+        console.error("ai_question_event not found");
+        return;
+    }
+
+    // 1️⃣ 写入Gradio事件
+    eventBox.value = question;
+
+    eventBox.dispatchEvent(
+        new Event("input", { bubbles: true })
+    );
+
+    // 2️⃣ 触发AI分析状态（关键）
+    const resultBox =
+        document.getElementById("ai-result");
+
+    resultBox.innerHTML = "🤖 AI正在分析中...";
+
+    // 3️⃣ 点击隐藏按钮（触发后端）
+    const sendBtn =
+        document.getElementById("ai_send_btn");
+
+    if (!sendBtn) {
+        console.error("ai_send_btn not found");
+        return;
+    }
+
+    sendBtn.click();
+
+    // 4️⃣ 清空输入框（修复点）
+    input.value = "";
+
 }
 
 window.addEventListener(
@@ -675,3 +698,168 @@ window.addEventListener(
         }
     }
 );
+
+document.addEventListener(
+"keydown",
+function(e){
+
+    if(
+        e.key === "Enter"
+        &&
+        !e.shiftKey
+    ){
+
+        const box =
+        document.getElementById(
+            "ai-question"
+        );
+
+        if(
+            document.activeElement
+            === box
+        ){
+
+            e.preventDefault();
+
+            askAI();
+
+        }
+
+    }
+
+});
+
+const observer = new MutationObserver(
+
+function(){
+
+    const status =
+    document.getElementById(
+        "ai-status-bar"
+    );
+
+    if(status){
+
+        status.style.display =
+        "none";
+
+    }
+}
+
+);
+
+observer.observe(
+
+    document.getElementById(
+        "ai-result"
+    ),
+
+    {
+        childList:true,
+        subtree:true
+    }
+
+);
+
+function resetAIState() {
+
+    const box =
+        document.getElementById("ai-result");
+
+    if (box) {
+        box.innerHTML = "";
+    }
+
+}
+
+function openAIAssistant(){
+
+    showPage(
+        "page-ai"
+    );
+
+}
+
+const pwdResult =
+
+document.querySelector(
+"#pwd_result textarea"
+);
+
+if(pwdResult){
+
+    pwdResult.addEventListener(
+
+        "input",
+
+        function(){
+
+            const result =
+
+            pwdResult.value;
+
+            if(!result){
+
+                return;
+
+            }
+
+            if(result === "SUCCESS"){
+
+                alert(
+                    "密码修改成功，请重新登录"
+                );
+
+                location.reload();
+
+                return;
+
+            }
+
+            alert(result);
+
+        }
+
+    );
+
+}
+
+setInterval(function(){
+
+    const box =
+    document.querySelector(
+        "#pwd_result textarea"
+    );
+
+    if(!box){
+        return;
+    }
+
+    const msg = box.value;
+
+    if(!msg){
+        return;
+    }
+
+    box.value = "";
+
+    if(msg.startsWith("SUCCESS")){
+
+        alert("密码修改成功，请重新登录");
+
+        location.reload();
+
+        return;
+    }
+
+    if(msg.startsWith("ERROR")){
+
+        alert(
+            msg.replace(
+                "ERROR:",
+                ""
+            )
+        );
+    }
+
+},500);
