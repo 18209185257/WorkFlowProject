@@ -4,6 +4,9 @@ from auth.auth_service import login_check,change_password
 
 from pages.login.login_page import create_login_page
 from pages.user.dashboard_page import create_dashboard_page
+from pages.leader.dashboard import (
+    create_leader_dashboard
+)
 from pages.user.project_page import create_project_page
 from pages.user.meeting_page import create_meeting_page
 from pages.user.daily_page import create_daily_page
@@ -382,33 +385,6 @@ with gr.Blocks(
         dashboard_html
     ) = create_dashboard_page()
 
-    # (
-    #     profile_page,
-    #
-    #     profile_username,
-    #
-    #     profile_real_name,
-    #
-    #     profile_role,
-    #
-    #     new_pwd,
-    #
-    #     save_pwd_btn,
-    #
-    #     pwd_result,
-    #
-    #     back_my_profile
-    # ) = create_my_profile_page()
-    #
-    # save_pwd_btn.click(
-    #     update_user_password,
-    #     inputs=[
-    #         user_state,
-    #         new_pwd
-    #     ],
-    #     outputs=pwd_result
-    # )
-
     # ==========================
     # 项目页
     # ==========================
@@ -484,20 +460,6 @@ with gr.Blocks(
             project_page
         ]
     )
-
-    # ==========================
-    # 修改密码页
-    # ==========================
-    # (
-    #     password_page,
-    #     back_password,
-    #     old_pwd,
-    #     new_pwd,
-    #     confirm_pwd,
-    #     submit_btn,
-    #     pwd_result
-    # ) = create_password_page()
-
     (
         leader_page,
         overview_html,
@@ -1045,6 +1007,28 @@ with gr.Blocks(
         outputs=my_project_progress_history_html
     )
 
+    (
+        leader_dashboard,
+
+        home_page,
+
+        ai_page,
+
+        project_page,
+
+        risk_page,
+
+        employee_page,
+
+        leader_customer_page,
+
+        analytics_page,
+
+        report_page,
+        ai_float_panel
+    ) = create_leader_dashboard(real_name_state)
+
+
     def delete_progress_and_refresh(progress_id, project_id):
         delete_project_progress(progress_id)
         return build_project_detail_html(
@@ -1112,31 +1096,6 @@ with gr.Blocks(
             )
 
         raise gr.Error(msg)
-
-
-    # submit_btn.click(
-    #     change_pwd_and_logout,
-    #     inputs=[
-    #         user_state,
-    #         old_pwd,
-    #         new_pwd,
-    #         confirm_pwd
-    #     ],
-    #     outputs=[
-    #
-    #         user_state,
-    #         role_state,
-    #
-    #         login_page,
-    #         dashboard_page,
-    #         leader_page,
-    #         password_page,
-    #
-    #         current_user,
-    #         logout_btn
-    #     ]
-    # )
-
 
     def save_user(data):
 
@@ -1293,7 +1252,7 @@ with gr.Blocks(
 
             login_page,
             dashboard_page,
-            leader_page,
+            leader_dashboard,# leader_page,
 
             current_user,
             logout_btn,
@@ -1341,17 +1300,6 @@ with gr.Blocks(
             register_panel
         ]
     )
-
-    # btn_change_pwd.click(
-    #     lambda: (
-    #         gr.update(visible=False),
-    #         gr.update(visible=True)
-    #     ),
-    #     outputs=[
-    #         dashboard_page,
-    #         password_page
-    #     ]
-    # )
 
     def register_and_back(
             username,

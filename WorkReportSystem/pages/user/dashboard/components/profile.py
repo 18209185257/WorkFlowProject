@@ -11,7 +11,7 @@ def build_profile_page(
     <div id="page-profile"
      class="page hidden">
 
-            <div class="page-header">
+            <div class="page-header-user">
         
                 <h2>👤 个人中心</h2>
         

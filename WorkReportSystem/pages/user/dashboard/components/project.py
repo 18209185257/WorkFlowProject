@@ -7,9 +7,9 @@ def build_project_page(
         <div id="page-project"
              class="page hidden">
         
-            <div class="page-header">
+            <div class="page-header-user">
         
-                <h2>📁 我的项目</h2>
+                <h2>我的项目</h2>
         
                 <p>
                     当前负责项目情况

@@ -1384,36 +1384,45 @@ def build_dashboard_v14(username, real_name):
         
                 <div class="menu active"
                      onclick="showPage('workbench',this)">
-        
-                    📊 工作台
-        
+                     <div style="display:flex;align-items:center;gap:8px;color:#ffffff">
+                        <img src="/gradio_api/file=static/images/platform_menu.png" class="menu-icon">
+                        工作台
+                    </div>
                 </div>
         
                 <div class="menu"
                      onclick="showPage('project',this)">
-        
-                    📁 我的项目
+                    <div style="display:flex;align-items:center;gap:8px;color:#ffffff">
+                        <img src="/gradio_api/file=static/images/project_menu.png" class="menu-icon">
+                        我的项目
+                    </div>
         
                 </div>
         
                 <div class="menu"
                      onclick="showPage('submit',this)">
-        
-                    📤 我的提交
+                    <div style="display:flex;align-items:center;gap:8px;color:#ffffff">
+                        <img src="/gradio_api/file=static/images/submit_menu.png" class="menu-icon">
+                        我的提交
+                    </div>
         
                 </div>
         
                 <div class="menu"
                      onclick="showPage('ai',this)">
-                
-                    🤖 AI工作助手
+                   <div style="display:flex;align-items:center;gap:8px;color:#ffffff">
+                        <img src="/gradio_api/file=static/images/ai_menu.png" class="menu-icon">
+                        AI工作助手
+                   </div>
                 
                 </div>
         
                 <div class="menu"
                      onclick="showPage('profile',this)">
-        
-                    👤 个人中心
+                   <div style="display:flex;align-items:center;gap:8px;color:#ffffff">
+                        <img src="/gradio_api/file=static/images/profile_menu.png" class="menu-icon">
+                        个人中心
+                   </div>
         
                 </div>
         

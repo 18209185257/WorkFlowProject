@@ -10,7 +10,7 @@ def build_ai_page():
            <div class="ai-hero">
 
                <div class="ai-title">
-                   🤖 基于AI大模型的智能办公系统
+                   基于AI大模型的智能办公系统
                </div>
 
                <div class="status-items">

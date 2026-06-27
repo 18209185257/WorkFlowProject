@@ -5,7 +5,7 @@ def build_submit_page(
        <!-- 我的提交 -->
         <div id="page-submit"
              class="page hidden">
-            <div class="page-header">
+            <div class="page-header-user">
                 <h2>📤 我的提交</h2>
                 <p>
                     最近工作记录

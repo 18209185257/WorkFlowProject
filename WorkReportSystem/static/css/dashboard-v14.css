@@ -28,8 +28,20 @@
 .menu{
     padding:16px 24px;
     cursor:pointer;
-    color:#d1d5db;
+    color:#ffffff;
     transition:.2s;
+}
+
+.menu-icon{
+    width:20px;
+    height:20px;
+    object-fit:contain;
+}
+
+.menu-icon_large {
+    width:30px;
+    height:30px;
+    object-fit:contain;
 }
 
 .menu:hover{
@@ -48,6 +60,7 @@
     flex:1;
     margin-left:20px;
     overflow-y:auto;
+    margin-bottom:250px;
 }
 
 .hidden{
@@ -667,7 +680,7 @@
     display:grid;
 
     grid-template-columns:
-        2fr 2fr 1fr 1fr;
+        1.5fr 3fr 1fr 1fr;
 
     font-weight:600;
 
@@ -682,7 +695,7 @@
     display:grid;
 
     grid-template-columns:
-        2fr 2fr 1fr 1fr;
+        1.5fr 3fr 1fr 1fr;
 
     align-items:center;
 
@@ -810,7 +823,7 @@
 
 }
 
-.page-header{
+.page-header-user{
 
     text-align:left;
 
@@ -1136,13 +1149,15 @@
 }
 
 .project_list{
-    max-height:240px;
+    max-height:260px;
     overflow-y:auto;
+    padding-bottom:30px;
 }
 
 .submit-timeline{
-    max-height:240px;
+    max-height:260px;
     overflow-y:auto;
+    padding-bottom:30px;
 }
 
 html, body {
