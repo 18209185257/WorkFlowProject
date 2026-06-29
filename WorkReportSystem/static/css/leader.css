@@ -35,6 +35,8 @@
 
     padding:20px;
 
+    width:240px;
+
 }
 
 #leader_sidebar button{
@@ -69,6 +71,9 @@
 }
 
 .leader-kpi-card{
+    flex:1;
+
+    min-width:180px;
 
     background:#1e293b;
 
@@ -204,6 +209,7 @@
     font-weight:700;
 
     margin-bottom:15px;
+    color:white;
 
 }
 
@@ -211,7 +217,7 @@
 
     margin-bottom:12px;
 
-    color:#cbd5e1;
+    color:white;
 
 }
 
@@ -246,23 +252,17 @@
 }
 
 .ai-panel{
-
     position:fixed;
-
-    right:100px;
-
-    bottom:20px;
-
-    width:400px;
-
-    height:500px;
-
-    background:#0f172a;
-
-    border-radius:12px;
-
-    display:none;
-
+    right:30px;
+    bottom:100px;
+    width:420px;
+    height:550px;
+    background:#111827;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    color:white;
+    overflow:hidden;
+    z-index:9999;
 }
 
 .ai-panel.show{
@@ -302,35 +302,83 @@
 }
 
 .warning-title{
-
     font-size:22px;
-
     font-weight:700;
-
     margin-bottom:15px;
+    color:white;
 
 }
 
 .warning-item{
-
     background:rgba(255,255,255,0.05);
-
     padding:10px;
-
     border-radius:8px;
-
     margin-bottom:10px;
-
+    color:white;
 }
 
 .warning-empty{
-
     background:#0f5132;
+    color:white;
+    padding:20px;
+    border-radius:12px;
+}
 
+.heatmap-panel{
+    background:#111827;
+    border-radius:12px;
+    padding:20px;
+    color:white;
+}
+
+.heatmap-title{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:15px;
     color:white;
 
-    padding:20px;
+}
 
-    border-radius:12px;
+.heatmap-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    padding:12px;
+
+    margin-bottom:8px;
+
+    border-radius:8px;
+
+    background:rgba(255,255,255,0.05);
+
+}
+
+.heatmap-name{
+
+    width:40%;
+    color:white;
+
+}
+
+.heatmap-risk{
+
+    width:30%;
+    color:white;
+
+}
+
+.heatmap-progress{
+
+    width:20%;
+    color:white;
+    text-align:right;
+
+}
+
+.ai-body{
+
+    padding:20px;
 
 }

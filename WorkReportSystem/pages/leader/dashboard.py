@@ -16,6 +16,23 @@ from pages.leader.components.ai_floating_panel import (
     create_ai_floating_panel_page
 )
 
+from pages.leader.services.leader_dashboard_service import (
+    build_project_status_chart,
+    build_project_trend_chart
+)
+
+from pages.leader.services.project_heatmap_service import (
+    build_project_heatmap_html
+)
+
+from pages.leader.services.leader_dashboard_service import (
+    build_daily_report_chart,
+    build_risk_rank_html
+)
+
+from pages.leader.services.dashboard_refresh_service import (
+    refresh_dashboard
+)
 
 def create_leader_dashboard(
         username_state
@@ -26,10 +43,12 @@ def create_leader_dashboard(
         elem_id="leader_dashboard"
     ) as dashboard:
 
-        with gr.Row():
+        with gr.Row(
+            elem_id="leader_main_layout",
+            equal_height=False
+        ):
 
             with gr.Column(
-                scale=1,
                 elem_id="leader_sidebar"
             ):
 
@@ -66,7 +85,7 @@ def create_leader_dashboard(
                 )
 
             with gr.Column(
-                scale=6
+                elem_id="leader_content"
             ):
 
                 (
@@ -76,10 +95,9 @@ def create_leader_dashboard(
                     project_status_chart,
                     ai_insight_html,
                     warning_html,
-                    auto_ai_html,
+                    project_heatmap_html,
                     report_submit_chart,
                     risk_rank_chart,
-                    ai_leader_box
                 ) = create_leader_home_page()
 
                 (
@@ -113,28 +131,92 @@ def create_leader_dashboard(
                     outputs=ai_answer
 
                 )
-            with gr.Column():
-                ai_float_panel = (
-                    create_ai_floating_panel_page()
-                )
+        ai_float_panel = (
+            create_ai_floating_panel_page()
+        )
 
+        home_btn.click(
+            build_project_trend_chart,
+            outputs=project_progress_chart
+        ).then(
+            fn=None,
+            js="""
+            ()=>{
+                setTimeout(
+                    renderLeaderCharts,
+                    300
+                );
+            }
+            """
+        )
+        home_btn.click(
+            build_project_status_chart,
+            outputs=project_status_chart
+        ).then(
+            fn=None,
+            js="""
+            ()=>{
+                setTimeout(
+                    renderLeaderCharts,
+                    300
+                );
+            }
+            """
+        )
+
+        home_btn.click(
+            build_project_heatmap_html,
+            outputs=project_heatmap_html
+        ).then(
+            fn=None,
+            js="""
+            ()=>{
+                setTimeout(
+                    renderLeaderCharts,
+                    300
+                );
+            }
+            """
+        )
+
+        home_btn.click(
+            build_daily_report_chart,
+            outputs=report_submit_chart
+        ).then(
+            fn=None,
+            js="""
+            ()=>{
+                setTimeout(
+                    renderLeaderCharts,
+                    300
+                );
+            }
+            """
+        )
+
+        home_btn.click(
+            build_risk_rank_html,
+            outputs=risk_rank_chart
+        ).then(
+            fn=None,
+            js="""
+            ()=>{
+                setTimeout(
+                    renderLeaderCharts,
+                    300
+                );
+            }
+            """
+        )
     return (
-    dashboard,
-
-    home_page,
-
-    ai_page,
-
-    project_page,
-
-    risk_page,
-
-    employee_page,
-
-    customer_page,
-
-    analytics_page,
-
-    report_page,
-    ai_float_panel
-)
+        dashboard,
+        home_page,
+        ai_page,
+        project_page,
+        risk_page,
+        employee_page,
+        customer_page,
+        analytics_page,
+        report_page,
+        ai_float_panel
+    )

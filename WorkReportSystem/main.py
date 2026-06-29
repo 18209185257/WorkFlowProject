@@ -134,8 +134,9 @@ from pages.user.services.my_submit_service import (
     build_my_submit_html
 )
 
-from pages.user.my_profile_page import (
-    create_my_profile_page
+from pages.leader.services.leader_dashboard_service import (
+    build_project_status_chart,
+    build_project_trend_chart
 )
 
 from pages.user.services.my_profile_service import (
@@ -168,6 +169,12 @@ from pages.user.services.agent_service import ai_agent
 
 from pages.user.services.password_service import (
     change_password
+)
+
+from pages.leader.services.dashboard_refresh_service import refresh_dashboard
+
+from pages.leader.services.leader_dashboard_service import (
+    build_daily_report_chart
 )
 
 # 初始化数据库
@@ -262,7 +269,8 @@ css_files = [
     "workflow_ai.css",
     "dashboard.css",
     "dashboard-v14.css",
-    "ai.css"
+    "ai.css",
+    "global.css"
 ]
 
 custom_css = ""
@@ -470,6 +478,7 @@ with gr.Blocks(
         btn_customer,
         btn_project_center
     ) = create_leader_page()
+
 
     (
         workflow_ai_page,
@@ -1148,27 +1157,20 @@ with gr.Blocks(
     # 登录
     # ====================================================
     def do_login(user, pwd):
-
         result = login_check(user, pwd)
-
         if not result:
             return (
-
                 "",
                 "",
                 "",
-
                 gr.update(visible=True),
                 gr.update(visible=False),
                 gr.update(visible=False),
-
                 gr.update(),
                 gr.update(),
-
                 "用户名或密码错误",
                 ""
             )
-
         role = result[0]
         real_name = result[1]
 
@@ -1184,8 +1186,11 @@ with gr.Blocks(
         )
 
         if role == "leader":
+            refresh_dashboard()
+            build_project_trend_chart()
+            build_project_status_chart()
+            build_daily_report_chart()
             return (
-
                 user,
                 role,
                 real_name,
@@ -1204,9 +1209,7 @@ with gr.Blocks(
                 "",
                 real_name
             )
-
         return (
-
             user,
             role,
             real_name,
@@ -1265,26 +1268,27 @@ with gr.Blocks(
         inputs=[user_state, real_name_state],
         outputs=dashboard_html
     ).then(
+        fn=lambda: print("登录成功，准备显示leader_dashboard"),  # 添加调试
+        js="""
+            ()=>{
+                console.log("开始渲染领导驾驶舱");
+                 setTimeout(()=>{
+                    renderLeaderCharts();
+                },1500);
+            }
+            """
+    ).then(
     fn=None,
     js="""
     () => {
-
-        console.log("Dashboard Loaded");
-
         setTimeout(()=>{
-
             if(window.afterDashboardRender){
-
                 window.afterDashboardRender();
-
             }
-
         },500);
-
     }
     """
-)
-
+    )
     register_btn.click(
         show_register,
         outputs=[
@@ -1342,45 +1346,14 @@ with gr.Blocks(
 
 
     def generate_business_ai():
-
         result = build_business_analysis_html()
-
         return wrap_analysis(result)
 
 
     generate_ai_btn.click(
-
         fn=generate_business_ai,
-
         outputs=cockpit_ai_analysis_html
     )
-
-
-    # ====================================================
-    # 打开管理端 用户管理页
-    # ====================================================
-    # def open_user_manager():
-    #
-    #     data = get_user_list()
-    #
-    #     print(data)
-    #
-    #     df = pd.DataFrame(
-    #         data,
-    #         columns=[
-    #             "用户名",
-    #             "角色",
-    #             "姓名",
-    #             "手机号",
-    #             "创建时间"
-    #         ]
-    #     )
-    #
-    #     return (
-    #         gr.update(visible=False),
-    #         gr.update(visible=True),
-    #         df
-    #     )
 
     def open_user_manager():
         data = build_user_html()
@@ -1472,21 +1445,6 @@ with gr.Blocks(
         }
         """
     )
-
-    # ====================================================
-    # 工作台 -> 项目汇报
-    # ====================================================
-    # btn_project_report.click(
-    #     lambda: (
-    #         gr.update(visible=False),
-    #         gr.update(visible=True)
-    #     ),
-    #     outputs=[
-    #         dashboard_page,
-    #         project_page
-    #     ]
-    # )
-
     # ====================================================
     # 工作台 -> 我的项目
     # ====================================================
@@ -1506,31 +1464,6 @@ with gr.Blocks(
                 real_name
             )
         )
-
-    # btn_my_project.click(
-    #     fn=open_my_project,
-    #     inputs=real_name_state,
-    #     outputs=[
-    #         dashboard_page,
-    #         my_project_page,
-    #         my_project_summary_html,
-    #         my_project_html
-    #     ]
-    # )
-
-    # ====================================================
-    # 工作台 -> 会议记录
-    # ====================================================
-    # btn_meeting.click(
-    #     lambda: (
-    #         gr.update(visible=False),
-    #         gr.update(visible=True)
-    #     ),
-    #     outputs=[
-    #         dashboard_page,
-    #         meeting_page
-    #     ]
-    # )
 
     # ====================================================
     # 客户管理 -> 工作台
@@ -1683,15 +1616,6 @@ with gr.Blocks(
         elem_classes=["hidden-trigger"]
     )
 
-    # ai_chat_btn.click(
-    #     ai_agent,
-    #     inputs=[
-    #         user_state,
-    #         ai_question_event
-    #     ],
-    #     outputs=ai_result_box
-    # )
-
     ai_chat_btn.click(
         lambda u, q: print(
             "触发成功",
@@ -1712,19 +1636,14 @@ with gr.Blocks(
     )
 
     ai_send_btn.click(
-
         ai_agent,
-
         inputs=[
             user_state,
             ai_question_event
         ],
-
         outputs=ai_result_box
 
     )
-
-    print(type(ai_question_event))
 
 
     ai_daily_btn.click(
@@ -1756,17 +1675,6 @@ with gr.Blocks(
         inputs=real_name_state,
         outputs=ai_result_box
     )
-
-    # ai_question_event.change(
-    #     ai_rag_chat,
-    #     inputs=ai_question_event,
-    #     outputs=ai_result_box
-    # )
-
-    # pwd_result = gr.Textbox(
-    #     elem_id="pwd_result"
-    # )
-
     rebuild_vector_btn = gr.Button(
         visible=False
     )
@@ -1777,13 +1685,9 @@ with gr.Blocks(
     )
 
     change_pwd_btn = gr.Button(
-
         value="change_pwd",
-
         elem_id="change_pwd_btn",
-
         elem_classes=["hidden-trigger"]
-
     )
 
     old_pwd_event = gr.Textbox(
@@ -1823,8 +1727,6 @@ with gr.Blocks(
             }
             """
     )
-
-
 
     # ====================================================
     # 项目页 -> 工作台
@@ -1939,20 +1841,6 @@ with gr.Blocks(
             }
             """
         )
-
-    # ====================================================
-    # 修改密码 -> 工作台
-    # ====================================================
-    # back_password.click(
-    #     lambda: (
-    #         gr.update(visible=True),
-    #         gr.update(visible=False)
-    #     ),
-    #     outputs=[
-    #         dashboard_page,
-    #         password_page
-    #     ]
-    # )
 
     # ====================================================
     # AI工作流查询
@@ -2097,16 +1985,11 @@ with gr.Blocks(
 
 
     def open_project_center():
-
         return (
-
             gr.update(visible=False),
-
             gr.update(visible=True),
-
             build_project_html()
         )
-
 
     btn_project_center.click(
 
@@ -2140,18 +2023,13 @@ with gr.Blocks(
 
 
     def open_project_detail(project_id):
-
         return (
-
             gr.update(visible=False),
-
             gr.update(visible=True),
-
             build_project_detail_html(
                 int(project_id)
             )
         )
-
 
     project_detail_event.change(
         fn=open_project_detail,
@@ -2186,41 +2064,23 @@ with gr.Blocks(
         row = get_progress_by_id(
             progress_id
         )
-
         if not row:
             return "", "", ""
-
         return (
-
             row[1],
             row[2],
             row[3]
         )
 
-
     load_progress_btn.click(
         fn=load_progress,
-
         inputs=edit_progress_id,
-
         outputs=[
-
             edit_progress_content,
-
             edit_risk_content,
-
             edit_next_plan
         ]
     )
-
-    # add_btn.click(
-    #     fn=lambda: """
-    #     <script>
-    #     document.getElementById('projectModal').style.display='flex'
-    #     </script>
-    #     """,
-    #     outputs=project_modal_html
-    # )
 
     add_btn.click(
         fn=lambda: (
@@ -2256,30 +2116,23 @@ with gr.Blocks(
 
     add_member_btn.click(
         fn=add_member_and_refresh,
-
         inputs=[
             current_project_id,
             member_name,
             member_role
         ],
-
         outputs=project_detail_html
     )
 
     delete_member_btn.click(
         fn=delete_project_member,
-
         inputs=delete_member_id
     )
 
     add_risk_btn.click(
-
         fn=add_risk_and_refresh,
-
         inputs=[
-
             current_project_id,
-
             risk_level,
             risk_desc,
             risk_solution

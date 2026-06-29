@@ -8,11 +8,6 @@ from pages.leader.services.leader_dashboard_service import (
 )
 
 from pages.leader.services.leader_dashboard_service import (
-    build_daily_report_chart,
-    build_risk_rank_html
-)
-
-from pages.leader.services.leader_dashboard_service import (
     build_ai_insight_html
 )
 
@@ -24,73 +19,81 @@ from pages.leader.services.warning_center_service import (
     build_warning_html
 )
 
+from pages.leader.services.project_heatmap_service import (
+    build_project_heatmap_html
+)
+
+from pages.leader.services.leader_dashboard_service import (
+    build_daily_report_chart,
+    build_risk_rank_html
+)
+
 def create_leader_home_page():
 
     with gr.Column(
         visible=True,
         elem_id="leader_home"
     ) as page:
-
-        gr.HTML("""
-        <div class='leader-page-title'>
-            🚀 AI智能驾驶舱
-        </div>
-        """)
-
-        with gr.Row():
+        with gr.Row(elem_classes=["leader-grid-row"]):
             kpi_html = gr.HTML(
-                value=build_kpi_html()
+                value=build_kpi_html(),
+                elem_classes=["leader-kpi-row"],
+                container=False
             )
 
-        with gr.Row():
+        with gr.Row(
+                elem_classes=["leader-grid-row"]
+        ):
             project_progress_chart = gr.HTML(
-                value=build_project_trend_chart()
+                value=build_project_trend_chart(),
+                elem_classes=["leader-card"],
+                container=False
             )
 
             project_status_chart = gr.HTML(
-                value=build_project_status_chart()
+                value=build_project_status_chart(),
+                elem_classes=["leader-card"],
+                container=False
             )
 
-        with gr.Row():
+        with gr.Row(
+                elem_classes=["leader-grid-row"]
+        ):
             ai_insight_html = gr.HTML(
-                value=build_ai_insight_html()
+                value=build_ai_insight_html(),
+                elem_classes=["leader-card"],
+                container=False
             )
 
-        with gr.Row():
             warning_html = gr.HTML(
-                value=build_warning_html()
+                value=build_warning_html(),
+                elem_classes=["leader-card"],
+                container=False
             )
 
-        with gr.Row():
-            auto_ai_html = gr.HTML(
-                value=f"""
-
-                <div class='leader-auto-ai'>
-
-                {build_auto_ai_insight()}
-
-                </div>
-
-                """
+        with gr.Row(
+            elem_classes=["leader-grid-row"]
+        ):
+            project_heatmap_html = gr.HTML(
+                value=build_project_heatmap_html(),
+                elem_classes=["leader-card-full"],
+                container=False
             )
 
-        with gr.Row():
+        with gr.Row(
+                elem_classes=["leader-grid-row"]
+        ):
             report_submit_chart = gr.HTML(
-                value=build_daily_report_chart()
+                value=build_daily_report_chart(),
+                elem_classes=["leader-card"],
+                container=False
             )
 
             risk_rank_chart = gr.HTML(
-                value=build_risk_rank_html()
+                value=build_risk_rank_html(),
+                elem_classes=["leader-card"],
+                container=False
             )
-
-        ai_leader_box = gr.HTML(
-            """
-            <div class='leader-ai-entry'>
-                🤖 AI领导助手
-            </div>
-            """
-        )
-
     return (
         page,
         kpi_html,
@@ -98,8 +101,7 @@ def create_leader_home_page():
         project_status_chart,
         ai_insight_html,
         warning_html,
-        auto_ai_html,
+        project_heatmap_html,
         report_submit_chart,
         risk_rank_chart,
-        ai_leader_box
     )

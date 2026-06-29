@@ -3,7 +3,9 @@ import json
 from pages.user.services.ai_chat_service import (
     generate_ai_chat
 )
-
+from pages.leader.services.chart_renderer import (
+    render_chart
+)
 
 def get_leader_kpi():
 
@@ -156,6 +158,7 @@ def get_project_status_data():
 def build_project_status_chart():
 
     rows = get_project_status_data()
+    print("项目状态数据：", rows)
 
     data = []
 
@@ -193,30 +196,10 @@ def build_project_status_chart():
         ]
     }
 
-    return f"""
-    <div id="project_status_chart"
-         style="height:350px;">
-    </div>
-
-    <script>
-
-    setTimeout(()=>{{
-
-        const chart =
-        echarts.init(
-            document.getElementById(
-                "project_status_chart"
-            )
-        );
-
-        chart.setOption(
-            {json.dumps(option)}
-        );
-
-    }},100);
-
-    </script>
-    """
+    return render_chart(
+        "project_status_chart",
+        option
+    )
 
 def get_project_trend():
 
@@ -241,8 +224,12 @@ def get_project_trend():
     return rows
 
 def build_project_trend_chart():
+    print(
+        "build_project_trend_chart()"
+    )
 
     rows = get_project_trend()
+    print("项目趋势数据：", rows)
 
     dates = []
     counts = []
@@ -282,31 +269,10 @@ def build_project_trend_chart():
             }
         ]
     }
-
-    return f"""
-    <div id="project_trend_chart"
-         style="height:350px;">
-    </div>
-
-    <script>
-
-    setTimeout(()=>{{
-
-        const chart =
-        echarts.init(
-            document.getElementById(
-                "project_trend_chart"
-            )
-        );
-
-        chart.setOption(
-            {json.dumps(option)}
-        );
-
-    }},100);
-
-    </script>
-    """
+    return render_chart(
+        "project_trend_chart",
+        option
+    )
 
 #日报提交趋势图
 def get_daily_report_trend():
@@ -334,6 +300,7 @@ def get_daily_report_trend():
 def build_daily_report_chart():
 
     rows = get_daily_report_trend()
+    print("日报趋势数据：", rows)
 
     dates = []
     counts = []
@@ -380,30 +347,10 @@ def build_daily_report_chart():
         ]
     }
 
-    return f"""
-    <div id="daily_report_chart"
-         style="height:350px;">
-    </div>
-
-    <script>
-
-    setTimeout(()=>{{
-
-        const chart =
-        echarts.init(
-            document.getElementById(
-                "daily_report_chart"
-            )
-        );
-
-        chart.setOption(
-            {json.dumps(option)}
-        );
-
-    }},100);
-
-    </script>
-    """
+    return render_chart(
+        "daily_report_chart",
+         option
+    )
 
 #风险排行榜
 def get_risk_rank():
