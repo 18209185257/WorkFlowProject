@@ -193,8 +193,14 @@ def build_project_status_chart():
 
                 "data":data
             }
-        ]
-    }
+        ],
+        "color":[
+            "#3b82f6",
+            "#06b6d4",
+            "#f59e0b",
+            "#22c55e",
+            "#ef4444"]
+            }
 
     return render_chart(
         "project_status_chart",
@@ -246,6 +252,7 @@ def build_project_trend_chart():
 
         "tooltip":{},
 
+
         "xAxis":{
             "type":"category",
             "data":dates,
@@ -267,7 +274,9 @@ def build_project_trend_chart():
                 "smooth":True,
                 "data":counts
             }
-        ]
+        ],
+        "color":["#3b82f6"],
+
     }
     return render_chart(
         "project_trend_chart",
@@ -344,7 +353,8 @@ def build_daily_report_chart():
                 "type":"bar",
                 "data":counts
             }
-        ]
+        ],
+        "color":["#06b6d4"],
     }
 
     return render_chart(

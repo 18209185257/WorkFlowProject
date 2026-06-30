@@ -8,6 +8,9 @@ from pages.user.dashboard.components.project import build_project_page
 from pages.user.dashboard.components.submit import build_submit_page
 from pages.user.ai_assistant.ai_page import build_ai_page
 from pages.user.dashboard.components.profile import build_profile_page
+from pages.leader.services.task_center.task_center_service import (
+    get_user_tasks
+)
 
 # 提交类型统计
 import json
@@ -1207,6 +1210,40 @@ def get_dashboard_data(real_name):
         "ai_stats": ai_stats
     }
 
+def build_todo_html(
+        username
+):
+
+    tasks = get_user_tasks(
+        username
+    )
+
+    html = ""
+
+    for t in tasks:
+
+        html += f"""
+
+        <div class="todo-item">
+
+            <div>
+
+                {t[1]}
+
+            </div>
+
+            <div>
+
+                {t[2]}
+
+            </div>
+
+        </div>
+
+        """
+
+    return html
+
 def build_dashboard_v14(username, real_name):
     data = get_dashboard_data(real_name)
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -1250,6 +1287,10 @@ def build_dashboard_v14(username, real_name):
     trend30_json = json.dumps(
         data["trend30"],
         ensure_ascii=False
+    )
+
+    todo_html = build_todo_html(
+        username
     )
 
     project_html = ""
@@ -1310,6 +1351,7 @@ def build_dashboard_v14(username, real_name):
         real_name,
         now,
         data,
+        todo_html,
         pie_json,
         project_html,
         submit_html

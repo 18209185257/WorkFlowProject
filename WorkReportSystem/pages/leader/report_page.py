@@ -3,7 +3,9 @@ import gradio as gr
 def create_leader_report_page():
 
     with gr.Column(
-        visible=False
+        visible=False,
+        elem_id="page-weekly_report",
+        elem_classes=["page"]
     ) as page:
 
         gr.HTML(

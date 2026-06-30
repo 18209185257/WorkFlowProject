@@ -4,6 +4,10 @@ from pages.leader.services.project_detail_service import (
 )
 from pages.leader.services.ai_business_service import call_llm
 
+from pages.leader.services.task_center.task_center_service import (
+    get_user_tasks
+)
+
 #新增查询员工项目
 def get_user_projects(username):
     conn = get_project_conn()
@@ -737,3 +741,37 @@ def query_my_project(username):
         })
 
     return result
+
+def build_task_html(
+        username
+):
+
+    tasks = get_user_tasks(
+        username
+    )
+
+    html = ""
+
+    for t in tasks:
+
+        html += f"""
+        <div class='todo-card'>
+
+            <b>{t[1]}</b>
+
+            <br>
+
+            优先级：
+
+            {t[2]}
+
+            <br>
+
+            截止：
+
+            {t[3]}
+
+        </div>
+        """
+
+    return html

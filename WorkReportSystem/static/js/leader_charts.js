@@ -1,26 +1,26 @@
 function renderLeaderCharts(){
-    console.log(
-        "图表数量:",
+
+    const charts =
         document.querySelectorAll(
             ".leader-chart"
-        ).length
+        );
+
+    console.log(
+        "开始渲染图表:",
+        charts.length
     );
 
-    document
-    .querySelectorAll(
-        ".leader-chart"
-    )
-    .forEach(dom=>{
+    charts.forEach(dom=>{
 
         const option =
-        JSON.parse(
-            dom.dataset.option
-        );
+            JSON.parse(
+                dom.dataset.option
+            );
 
         let chart =
-        echarts.getInstanceByDom(
-            dom
-        );
+            echarts.getInstanceByDom(
+                dom
+            );
 
         if(chart){
 
@@ -29,13 +29,9 @@ function renderLeaderCharts(){
         }
 
         chart =
-        echarts.init(
-            dom
-        );
+            echarts.init(dom);
 
-        chart.setOption(
-            option
-        );
+        chart.setOption(option);
 
     });
 

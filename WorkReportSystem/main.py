@@ -1,3 +1,5 @@
+import sqlite3
+
 import gradio as gr
 from fastapi import FastAPI
 from auth.auth_service import login_check,change_password
@@ -177,8 +179,43 @@ from pages.leader.services.leader_dashboard_service import (
     build_daily_report_chart
 )
 
+from task.business_report_scheduler import (
+    start_scheduler
+)
+
+# from common.db import get_project_conn
+#
+# conn = get_project_conn()
+# cur = conn.cursor()
+#
+# sql = """
+#         UPDATE project
+#         SET progress_rate = ?
+#         WHERE id = ?;
+#         """
+# cur.execute(sql, (40, 5))
+# conn.commit()
+# # 返回受影响行数，判断是否找到该项目
+# row_count = cur.rowcount
+# if row_count > 0:
+#   print(f"修改成功！项目ID{5}，新进度：{40}%")
+# else:
+#   print(f"未查询到id={5}的项目，无数据更新")
+
+# #ALTER TABLE 新增字段，TEXT类型，允许为空
+# alter_sql = """
+# ALTER TABLE project ADD COLUMN progress_rate TEXT;
+# """
+# cur.execute(alter_sql)
+# conn.commit()
+
+# # 1. 删除旧表
+# cur.execute("DROP TABLE IF EXISTS customer;")
+
 # 初始化数据库
 init_db()
+#开启邮箱自动推送定时任务
+# start_scheduler()
 
 app = FastAPI()
 #项目排行
@@ -1034,7 +1071,15 @@ with gr.Blocks(
         analytics_page,
 
         report_page,
-        ai_float_panel
+
+        ai_float_panel,
+
+        weekly_report_page,
+
+        project_manager_page,
+
+        diagnosis_page
+
     ) = create_leader_dashboard(real_name_state)
 
 
@@ -1271,7 +1316,6 @@ with gr.Blocks(
         fn=lambda: print("登录成功，准备显示leader_dashboard"),  # 添加调试
         js="""
             ()=>{
-                console.log("开始渲染领导驾驶舱");
                  setTimeout(()=>{
                     renderLeaderCharts();
                 },1500);

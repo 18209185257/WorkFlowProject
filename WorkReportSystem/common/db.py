@@ -60,6 +60,9 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
         project_name TEXT,
+        customer_name TEXT,
+        project_status TEXT,
+        project_manager TEXT,
     
         start_date TEXT,
         end_date TEXT,
@@ -76,6 +79,8 @@ def init_db():
         risk_block TEXT,
     
         progress TEXT,
+        
+        progress_rate TEXT,
     
         update_time TEXT
     )''')
@@ -273,7 +278,15 @@ def init_db():
     
         address TEXT,
     
-        create_time TEXT
+        create_time TEXT,
+        
+        industry   TEXT,
+        
+        status TEXT,
+        
+        amount REAL,
+        
+        last_contact_time TEXT
     )
     """)
 
@@ -332,6 +345,31 @@ def init_db():
         score REAL DEFAULT 1.0,
         create_time TEXT
     )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS ai_business_report (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        report_date TEXT,
+        report_content TEXT,
+        create_time TEXT
+    );
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS ai_task (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_name TEXT,
+        task_title TEXT,
+        task_desc TEXT,
+        assignee TEXT,
+        priority TEXT,
+        deadline TEXT,
+        status TEXT,
+        task_type TEXT,
+        source TEXT,
+        create_time TEXT
+    );
     """)
 
     conn.commit()

@@ -2,6 +2,7 @@ def build_workbench_page(
     real_name,
     now,
     data,
+    todo_html,
     pie_json,
     project_html,
     submit_html
@@ -81,6 +82,13 @@ def build_workbench_page(
 
                 </div>
 
+            </div>
+            
+            <div class="todo-panel">
+                <h3>
+                    📌 我的待办
+                </h3>
+                {todo_html}
             </div>
 
             <div class="chart-row">

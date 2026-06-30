@@ -1170,3 +1170,16 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     display: none !important;
 }
 
+.todo-panel{
+    margin-top:20px;
+    background:white;
+    border-radius:12px;
+    padding:10px;
+    margin-bottom:30px;
+}
+
+.todo-item{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
